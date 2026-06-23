@@ -278,7 +278,8 @@ YouTubeGrabberAudioProcessorEditor::YouTubeGrabberAudioProcessorEditor (
         reactBackdrop.reset();
     }
 
-    titleLabel.setText ("StashTrack", juce::dontSendNotification);
+    titleLabel.setText ("StashTrack v" + juce::String (JucePlugin_VersionString),
+                         juce::dontSendNotification);
     titleLabel.setFont (juce::FontOptions { 24.0f, juce::Font::bold });
     titleLabel.setColour (juce::Label::textColourId, kText);
     titleLabel.setJustificationType (juce::Justification::centredLeft);
@@ -412,7 +413,7 @@ void YouTubeGrabberAudioProcessorEditor::resized()
 
     auto header = area.removeFromTop (34);
     header.removeFromLeft (58);
-    titleLabel.setBounds (header.removeFromLeft (188));
+    titleLabel.setBounds (header.removeFromLeft (230));
     statusLabel.setBounds (header);
     area.removeFromTop (16);
 

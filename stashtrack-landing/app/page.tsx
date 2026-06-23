@@ -5,7 +5,7 @@ import styles from './page.module.css'
 
 const SUPPORT_EMAIL = 'vsts@n9records.com'
 const DOWNLOAD_URL =
-  'https://github.com/davad00/StashTrack/releases/download/v0.2/StashTrackv0.2Setup.exe'
+  'https://github.com/davad00/StashTrack/releases/download/v0.3/StashTrackv0.3Setup.exe'
 
 const bars = Array.from({ length: 84 }, (_, index) => {
   const a = Math.sin(index * 0.47) * 0.5 + 0.5
@@ -24,7 +24,7 @@ const specs = [
   ['Format', 'VST3 for Windows'],
   ['Runtime', 'Bundled uvx, Deno, ffmpeg'],
   ['Output', 'Drag-ready WAV'],
-  ['Version', 'v0.2'],
+  ['Version', 'v0.3'],
 ]
 
 function Waveform({ compact = false }: { compact?: boolean }) {
@@ -58,7 +58,7 @@ export default function Home() {
         <a href="#top" className={styles.brand} aria-label="StashTrack home">
           <span className={styles.mark} aria-hidden="true" />
           <span>StashTrack</span>
-          <span className={styles.version}>v0.2</span>
+          <span className={styles.version}>v0.3</span>
         </a>
         <nav className={styles.navLinks} aria-label="Primary navigation">
           <a href="#workflow">Workflow</a>
@@ -82,7 +82,7 @@ export default function Home() {
           </p>
           <div className={styles.actions}>
             <a className={styles.primaryButton} href={DOWNLOAD_URL}>
-              Download StashTrack v0.2
+              Download StashTrack v0.3
             </a>
             <a className={styles.secondaryButton} href="#workflow">
               See the workflow
@@ -218,7 +218,7 @@ export default function Home() {
         <p className={styles.kicker}>stashtrack.n9records.com</p>
         <h2>Keep the browser out of the beat.</h2>
         <a className={styles.primaryButton} href={DOWNLOAD_URL}>
-          Get StashTrack v0.2
+          Get StashTrack v0.3
         </a>
         <p>
           Support: <a href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a>

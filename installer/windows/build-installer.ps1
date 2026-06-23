@@ -32,7 +32,7 @@ $dist = Join-Path $root "dist"
 
 $pluginSource = Join-Path $BuildDir "StashTrack_artefacts\$Configuration\VST3\StashTrack.vst3"
 $pluginDestination = Join-Path $payload "StashTrack.vst3"
-$setupOutput = Join-Path $dist "StashTrackv0.2Setup.exe"
+$setupOutput = Join-Path $dist "StashTrackv0.3Setup.exe"
 
 function Get-FullPath {
     param([string] $Path)
@@ -80,7 +80,13 @@ function Invoke-Download {
 
     New-Item -ItemType Directory -Force -Path (Split-Path -Parent $Destination) | Out-Null
 
-    if ($ForceDownloads -or -not (Test-Path -LiteralPath $Destination)) {
+    $needsDownload = $ForceDownloads -or -not (Test-Path -LiteralPath $Destination)
+
+    if (-not $needsDownload) {
+        $needsDownload = (Get-Item -LiteralPath $Destination).Length -le 0
+    }
+
+    if ($needsDownload) {
         Write-Host "Downloading $Url"
         Invoke-WebRequest -Uri $Url -OutFile $Destination -UseBasicParsing
     } else {
@@ -315,7 +321,7 @@ function Write-StagingDocuments {
     @"
 StashTrack VST3 Plug-in
 Publisher: N9 Records
-Version: v0.2
+Version: v0.3
 Website: https://stashtrack.n9records.com
 Support: vsts@n9records.com
 
@@ -327,6 +333,7 @@ Fresh-PC notes:
 - ffmpeg.exe is bundled beside the plug-in binary.
 - deno.exe is bundled beside the plug-in binary so yt-dlp can solve YouTube JavaScript challenges.
 - Microsoft Visual C++ Redistributable x64 is installed silently only when it is missing.
+- Old StashTrack.vst3 copies in common and user-local VST3 folders are removed before install.
 - On first download, uvx may fetch and cache yt-dlp and its EJS helper package from the internet.
 
 After setup, open your DAW, rescan VST3 plug-ins, and load StashTrack.
@@ -386,7 +393,7 @@ if (Test-Path -LiteralPath $setupOutput) {
 
 $iscc = Ensure-InnoCompiler
 
-Write-Host "Compiling StashTrackv0.2Setup.exe..."
+Write-Host "Compiling StashTrackv0.3Setup.exe..."
 Push-Location $installerRoot
 try {
     & $iscc "StashTrack.iss"

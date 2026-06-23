@@ -8,7 +8,7 @@ $renderYaml = Get-Content -Raw (Join-Path $root "render.yaml")
 $landingPackage = Get-Content -Raw (Join-Path $root "stashtrack-landing/package.json")
 $landingNextConfig = Get-Content -Raw (Join-Path $root "stashtrack-landing/next.config.mjs")
 $landingPage = Get-Content -Raw (Join-Path $root "stashtrack-landing/app/page.tsx")
-$releaseInstallerUrl = "https://github.com/davad00/StashTrack/releases/download/v0.2/StashTrackv0.2Setup.exe"
+$releaseInstallerUrl = "https://github.com/davad00/StashTrack/releases/download/v0.3/StashTrackv0.3Setup.exe"
 
 function Assert-Contains {
     param(
@@ -22,7 +22,7 @@ function Assert-Contains {
     }
 }
 
-Assert-Contains $cmake 'project(StashTrack VERSION 0.2.0)' 'CMake project must be named StashTrack with version 0.2.0.'
+Assert-Contains $cmake 'project(StashTrack VERSION 0.3.0)' 'CMake project must be named StashTrack with version 0.3.0.'
 Assert-Contains $cmake 'juce_add_plugin(StashTrack' 'JUCE plug-in target must be named StashTrack.'
 Assert-Contains $cmake 'COMPANY_NAME              "N9 Records"' 'JUCE company name must be N9 Records.'
 Assert-Contains $cmake 'COMPANY_WEBSITE           "https://stashtrack.n9records.com"' 'JUCE company website must be stashtrack.n9records.com.'
@@ -36,7 +36,7 @@ Assert-Contains $readme '# StashTrack JUCE Plug-in' 'README title must use Stash
 Assert-Contains $readme 'Publisher: N9 Records' 'README must document the publisher.'
 Assert-Contains $readme 'Website: https://stashtrack.n9records.com' 'README must document the website.'
 Assert-Contains $readme 'Support: vsts@n9records.com' 'README must document the support email.'
-Assert-Contains $readme 'Version: v0.2' 'README must document the preferred display version.'
+Assert-Contains $readme 'Version: v0.3' 'README must document the preferred display version.'
 Assert-Contains $readme 'License: StashTrack Non-Commercial License v0.1' 'README must document the custom non-commercial license.'
 Assert-Contains $license '# StashTrack Non-Commercial License v0.1' 'License file must use the custom StashTrack license title.'
 Assert-Contains $license 'No Commercial Use Or Profit' 'License file must prohibit commercial use and profit.'
@@ -51,7 +51,7 @@ Assert-Contains $renderYaml 'stashtrack.n9records.com' 'Render Blueprint must co
 Assert-Contains $landingPackage '"packageManager": "bun@' 'Landing package must declare Bun as the package manager.'
 Assert-Contains $landingPackage '"build": "next build"' 'Landing package must expose the Next build script.'
 Assert-Contains $landingPackage '"start": "next start"' 'Landing package must expose the Next start script.'
-Assert-Contains $landingPage $releaseInstallerUrl 'Landing page must download the v0.2 installer from the GitHub Release asset.'
+Assert-Contains $landingPage $releaseInstallerUrl 'Landing page must download the v0.3 installer from the GitHub Release asset.'
 
 if ($renderYaml.Contains('runtime: static') -or $renderYaml.Contains('staticPublishPath:')) {
     throw 'Render Blueprint must not be configured as a static site.'
@@ -124,8 +124,8 @@ $innoScript = Get-Content -Raw $windowsExeInstallerScript
 
 foreach ($required in @(
     'AppName=StashTrack',
-    '#define AppVersion "v0.2"',
-    '#define AppVersionNumeric "0.2.0"',
+    '#define AppVersion "v0.3"',
+    '#define AppVersionNumeric "0.3.0"',
     '#define AppPublisher "N9 Records"',
     '#define AppURL "https://stashtrack.n9records.com"',
     '#define AppSupportEmail "vsts@n9records.com"',
@@ -133,6 +133,7 @@ foreach ($required in @(
     'AppCopyright=Copyright (c) 2026 N9 Records',
     'UninstallFilesDir={commonappdata}\N9 Records\StashTrack\Uninstall',
     'DefaultDirName={commoncf}\VST3\StashTrack.vst3',
+    'Type: filesandordirs; Name: "{localappdata}\Programs\Common\VST3\StashTrack.vst3"',
     'PrivilegesRequired=admin',
     'VersionInfoCopyright=Copyright (c) 2026 N9 Records',
     'Source: "staging\Payload\StashTrack.vst3\*"',
@@ -160,7 +161,7 @@ foreach ($required in @(
     'innosetup-6.7.3.exe',
     'vc_redist.x64.exe',
     '$vcRedistCache = Join-Path $cache "vc_redist.x64.exe"',
-    'StashTrackv0.2Setup.exe',
+    'StashTrackv0.3Setup.exe',
     'ISCC.exe'
 )) {
     Assert-Contains $builderScript $required "Windows EXE installer build script is missing required text: $required"

@@ -1,6 +1,6 @@
 #define AppName "StashTrack"
-#define AppVersion "v0.2"
-#define AppVersionNumeric "0.2.0"
+#define AppVersion "v0.3"
+#define AppVersionNumeric "0.3.0"
 #define AppPublisher "N9 Records"
 #define AppURL "https://stashtrack.n9records.com"
 #define AppSupportEmail "vsts@n9records.com"
@@ -24,7 +24,7 @@ ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 UninstallFilesDir={commonappdata}\N9 Records\StashTrack\Uninstall
 OutputDir=..\..\dist
-OutputBaseFilename=StashTrackv0.2Setup
+OutputBaseFilename=StashTrackv0.3Setup
 Compression=lzma2
 SolidCompression=yes
 WizardStyle=modern
@@ -56,6 +56,9 @@ Source: "staging\THIRD-PARTY-NOTICES.txt"; DestDir: "{app}\Contents\Resources"; 
 
 [InstallDelete]
 Type: filesandordirs; Name: "{app}"
+Type: filesandordirs; Name: "{commoncf}\VST3\StashTrack.vst3"
+Type: filesandordirs; Name: "{commoncf32}\VST3\StashTrack.vst3"
+Type: filesandordirs; Name: "{localappdata}\Programs\Common\VST3\StashTrack.vst3"
 
 [Dirs]
 Name: "{commoncf}\VST3"

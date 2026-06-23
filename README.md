@@ -7,7 +7,7 @@ StashTrack is a JUCE audio plug-in that lets you paste a YouTube or other yt-dlp
 Publisher: N9 Records
 Website: https://stashtrack.n9records.com
 Support: vsts@n9records.com
-Version: v0.2
+Version: v0.3
 Copyright: Copyright (c) 2026 N9 Records
 License: StashTrack Non-Commercial License v0.1. Free to use, copy, modify, and share for non-commercial purposes only. No commercial use or profit is allowed.
 
@@ -121,13 +121,13 @@ bun run typecheck
 bun run build
 ```
 
-The landing page download buttons point to the v0.2 GitHub Release installer:
+The landing page download buttons point to the v0.3 GitHub Release installer:
 
 ```text
-https://github.com/davad00/StashTrack/releases/download/v0.2/StashTrackv0.2Setup.exe
+https://github.com/davad00/StashTrack/releases/download/v0.3/StashTrackv0.3Setup.exe
 ```
 
-After rebuilding `dist/StashTrackv0.2Setup.exe`, upload the release asset to GitHub Releases and update `stashtrack-landing/app/page.tsx` if the release URL changes.
+After rebuilding `dist/StashTrackv0.3Setup.exe`, upload the release asset to GitHub Releases and update `stashtrack-landing/app/page.tsx` if the release URL changes.
 
 ## License
 
@@ -163,16 +163,16 @@ powershell -NoProfile -ExecutionPolicy Bypass -File installer/windows/build-inst
 The installer is written to:
 
 ```text
-dist/StashTrackv0.2Setup.exe
+dist/StashTrackv0.3Setup.exe
 ```
 
-`StashTrackv0.2Setup.exe` installs to the standard system VST3 folder:
+`StashTrackv0.3Setup.exe` installs to the standard system VST3 folder:
 
 ```text
 C:\Program Files\Common Files\VST3\StashTrack.vst3
 ```
 
-The installer bundles `uv.exe`, `uvx.exe`, `ffmpeg.exe`, `deno.exe`, and the Microsoft Visual C++ Redistributable x64. The setup checks for the VC++ runtime before running the redistributable. If Inno Setup is not installed on the build machine, the builder downloads Inno Setup 6 locally and uses `ISCC.exe` to compile the installer. The target PC still needs internet access when StashTrack first downloads from a URL because `uvx` fetches/caches yt-dlp and its EJS helper package on demand.
+The installer bundles `uv.exe`, `uvx.exe`, `ffmpeg.exe`, `deno.exe`, and the Microsoft Visual C++ Redistributable x64. The setup checks for the VC++ runtime before running the redistributable. It also removes stale `StashTrack.vst3` copies from system and user-local VST3 folders before installing, so FL Studio is less likely to keep loading an old scanned plug-in. If Inno Setup is not installed on the build machine, the builder downloads Inno Setup 6 locally and uses `ISCC.exe` to compile the installer. The target PC still needs internet access when StashTrack first downloads from a URL because `uvx` fetches/caches yt-dlp and its EJS helper package on demand.
 
 For a simple install after building, run:
 
