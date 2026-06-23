@@ -32,23 +32,14 @@ bun run start -- -H 0.0.0.0 -p 3000
 
 ## Installer Download
 
-The download buttons point to the same-origin installer:
-
-```text
-/downloads/StashTrackv0.1Setup.exe
-```
-
-Keep this file in sync with the latest root build output:
-
-```text
-public/downloads/StashTrackv0.1Setup.exe
-```
-
-The v0.1 GitHub Release asset mirrors the same installer:
+The download buttons point to the v0.1 GitHub Release installer:
 
 ```text
 https://github.com/davad00/StashTrack/releases/download/v0.1/StashTrackv0.1Setup.exe
 ```
+
+Upload a new release asset and update `app/page.tsx` when the release version
+changes.
 
 ## Render
 
@@ -65,6 +56,9 @@ with:
 ## Legal
 
 Only download content you own, have licensed, or have rights to use.
+
+StashTrack is free to use, copy, modify, and share for non-commercial purposes
+only. No commercial use or profit is allowed. See the root `LICENSE.md`.
 
 ## Support
 

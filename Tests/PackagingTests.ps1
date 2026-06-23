@@ -3,11 +3,12 @@ $ErrorActionPreference = "Stop"
 $root = Resolve-Path (Join-Path $PSScriptRoot "..")
 $cmake = Get-Content -Raw (Join-Path $root "CMakeLists.txt")
 $readme = Get-Content -Raw (Join-Path $root "README.md")
+$license = Get-Content -Raw (Join-Path $root "LICENSE.md")
 $renderYaml = Get-Content -Raw (Join-Path $root "render.yaml")
 $landingPackage = Get-Content -Raw (Join-Path $root "stashtrack-landing/package.json")
 $landingNextConfig = Get-Content -Raw (Join-Path $root "stashtrack-landing/next.config.mjs")
 $landingPage = Get-Content -Raw (Join-Path $root "stashtrack-landing/app/page.tsx")
-$landingInstaller = Join-Path $root "stashtrack-landing/public/downloads/StashTrackv0.1Setup.exe"
+$releaseInstallerUrl = "https://github.com/davad00/StashTrack/releases/download/v0.1/StashTrackv0.1Setup.exe"
 
 function Assert-Contains {
     param(
@@ -36,6 +37,10 @@ Assert-Contains $readme 'Publisher: N9 Records' 'README must document the publis
 Assert-Contains $readme 'Website: https://stashtrack.n9records.com' 'README must document the website.'
 Assert-Contains $readme 'Support: vsts@n9records.com' 'README must document the support email.'
 Assert-Contains $readme 'Version: v0.1' 'README must document the preferred display version.'
+Assert-Contains $readme 'License: StashTrack Non-Commercial License v0.1' 'README must document the custom non-commercial license.'
+Assert-Contains $license '# StashTrack Non-Commercial License v0.1' 'License file must use the custom StashTrack license title.'
+Assert-Contains $license 'No Commercial Use Or Profit' 'License file must prohibit commercial use and profit.'
+Assert-Contains $license 'Nobody may profit from StashTrack or from any original StashTrack code' 'License file must explicitly forbid profit from StashTrack code.'
 Assert-Contains $renderYaml 'runtime: node' 'Render Blueprint must deploy the landing page as a live Node web service.'
 Assert-Contains $renderYaml 'plan: free' 'Render Blueprint must use the free tier.'
 Assert-Contains $renderYaml 'rootDir: stashtrack-landing' 'Render Blueprint must build from the landing page folder.'
@@ -46,7 +51,7 @@ Assert-Contains $renderYaml 'stashtrack.n9records.com' 'Render Blueprint must co
 Assert-Contains $landingPackage '"packageManager": "bun@' 'Landing package must declare Bun as the package manager.'
 Assert-Contains $landingPackage '"build": "next build"' 'Landing package must expose the Next build script.'
 Assert-Contains $landingPackage '"start": "next start"' 'Landing package must expose the Next start script.'
-Assert-Contains $landingPage "const DOWNLOAD_URL = '/downloads/StashTrackv0.1Setup.exe'" 'Landing page must download the bundled v0.1 installer from the same site.'
+Assert-Contains $landingPage $releaseInstallerUrl 'Landing page must download the v0.1 installer from the GitHub Release asset.'
 
 if ($renderYaml.Contains('runtime: static') -or $renderYaml.Contains('staticPublishPath:')) {
     throw 'Render Blueprint must not be configured as a static site.'
@@ -56,18 +61,8 @@ if ($landingNextConfig.Contains("output: 'export'")) {
     throw 'Landing Next config must not use static export for the live Render service.'
 }
 
-if (-not (Test-Path $landingInstaller)) {
-    throw "Bundled landing-page installer is missing: $landingInstaller"
-}
-
-$landingInstallerInfo = Get-Item $landingInstaller
-
-if ($landingInstallerInfo.Length -lt 50000000) {
-    throw "Bundled landing-page installer looks too small: $($landingInstallerInfo.Length) bytes."
-}
-
-if ($landingInstallerInfo.Length -gt 99000000) {
-    throw "Bundled landing-page installer is close to or over common Git host file limits: $($landingInstallerInfo.Length) bytes."
+if (Get-ChildItem (Join-Path $root "stashtrack-landing/public") -Recurse -Filter "*.exe" -ErrorAction SilentlyContinue) {
+    throw "Landing page must not commit installer binaries; use GitHub Releases for downloads."
 }
 
 $windowsInstaller = Join-Path $root "installer/install-stashtrack.ps1"

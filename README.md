@@ -9,6 +9,7 @@ Website: https://stashtrack.n9records.com
 Support: vsts@n9records.com
 Version: v0.1
 Copyright: Copyright (c) 2026 N9 Records
+License: StashTrack Non-Commercial License v0.1. Free to use, copy, modify, and share for non-commercial purposes only. No commercial use or profit is allowed.
 
 Internal VST3 compatibility note: the plug-in keeps its original JUCE manufacturer code so DAWs such as FL Studio can continue opening existing StashTrack plugin database entries after branding metadata changes.
 
@@ -120,19 +121,19 @@ bun run typecheck
 bun run build
 ```
 
-The landing page serves the Windows installer directly from:
-
-```text
-stashtrack-landing/public/downloads/StashTrackv0.1Setup.exe
-```
-
-After rebuilding `dist/StashTrackSetup.exe`, copy it to that path before pushing if you want the website download button to ship the newest installer.
-
-The v0.1 release asset is also published at:
+The landing page download buttons point to the v0.1 GitHub Release installer:
 
 ```text
 https://github.com/davad00/StashTrack/releases/download/v0.1/StashTrackv0.1Setup.exe
 ```
+
+After rebuilding `dist/StashTrackSetup.exe`, upload the renamed release asset to GitHub Releases and update `stashtrack-landing/app/page.tsx` if the release URL changes.
+
+## License
+
+StashTrack's original code and project materials are under the [StashTrack Non-Commercial License v0.1](LICENSE.md). You can use, copy, modify, and share it for non-commercial purposes, but nobody may profit from StashTrack or its original code without prior written permission from N9 Records.
+
+Third-party dependencies keep their own licenses.
 
 ## Build
 

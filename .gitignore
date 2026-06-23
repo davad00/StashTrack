@@ -44,6 +44,7 @@ _deps/
 dist/
 installer/windows/cache/
 installer/windows/staging/
+stashtrack-landing/public/downloads/*.exe
 
 # Generated JS UI bundle
 jsui/build/
