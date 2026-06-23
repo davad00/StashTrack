@@ -32,10 +32,10 @@ bun run start -- -H 0.0.0.0 -p 3000
 
 ## Installer Download
 
-The download buttons point to the v0.1 GitHub Release installer:
+The download buttons point to the v0.2 GitHub Release installer:
 
 ```text
-https://github.com/davad00/StashTrack/releases/download/v0.1/StashTrackv0.1Setup.exe
+https://github.com/davad00/StashTrack/releases/download/v0.2/StashTrackv0.2Setup.exe
 ```
 
 Upload a new release asset and update `app/page.tsx` when the release version

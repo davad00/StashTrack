@@ -29,6 +29,7 @@ __v0_jsx-dev-runtime.ts
 .v0-trash/
 .vercel/
 .agents/
+.codex-remote-attachments/
 docs/superpowers/
 
 # CMake/JUCE builds

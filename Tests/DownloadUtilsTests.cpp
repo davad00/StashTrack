@@ -26,9 +26,15 @@ namespace
 
         expect (command.size() > 10, "command should contain yt-dlp arguments");
         expect (command[0].containsIgnoreCase ("uvx"), "first argument should launch uvx");
-        expect (command[1] == "--from", "uvx command should choose the PyPI package explicitly");
-        expect (command[2] == "yt-dlp", "uvx command should install/run the yt-dlp package");
-        expect (command[3] == "yt-dlp", "uvx command should run the yt-dlp console command");
+        expect (command.contains ("--refresh-package"),
+                "uvx command should refresh yt-dlp before launch");
+        expect (command[command.indexOf ("--refresh-package") + 1] == "yt-dlp",
+                "uvx refresh should target the yt-dlp package");
+        expect (command.contains ("--from"), "uvx command should choose the PyPI package explicitly");
+        expect (command[command.indexOf ("--from") + 1] == "yt-dlp@latest",
+                "uvx command should install/run the latest yt-dlp package");
+        expect (command[command.indexOf ("--from") + 2] == "yt-dlp",
+                "uvx command should run the yt-dlp console command");
         expect (command.contains ("-f"), "command should request an explicit format");
         expect (command[command.indexOf ("-f") + 1] == "bestaudio", "command should request bestaudio");
         expect (command.contains ("-x"), "command should extract audio");
@@ -111,8 +117,8 @@ namespace
             toolDirectory);
 
         expect (command[0].containsIgnoreCase ("uvx"), "command should still launch uvx");
-        expect (command[2] == "yt-dlp",
-                "bundled Deno should keep uvx on the current yt-dlp package");
+        expect (command[command.indexOf ("--from") + 1] == "yt-dlp@latest",
+                "bundled Deno should keep uvx on the latest yt-dlp package");
         expect (command.contains ("--js-runtimes"),
                 "bundled Deno should be passed to yt-dlp for YouTube JS challenge solving");
         expect (command[command.indexOf ("--js-runtimes") + 1].startsWithIgnoreCase ("deno:"),
@@ -146,6 +152,18 @@ namespace
         expect (analysis.hasError, "ERROR lines should mark yt-dlp output as failed");
         expect (analysis.message.containsIgnoreCase ("ffmpeg not found"),
                 "error summary should include the yt-dlp error text");
+    }
+
+    void parsesYtDlpCliErrorLines()
+    {
+        const auto folder = juce::File::getSpecialLocation (juce::File::tempDirectory);
+        const auto analysis = StashTrack::analyseYtDlpOutput (
+            "yt-dlp: error: no such option: --js-runtimes\n",
+            folder);
+
+        expect (analysis.hasError, "yt-dlp CLI error lines should mark output as failed");
+        expect (analysis.message.containsIgnoreCase ("no such option: --js-runtimes"),
+                "CLI error summary should include the unsupported option text");
     }
 
     void extractsPrintedDownloadedFileFromOutput()
@@ -317,6 +335,7 @@ int main()
     commandUsesBundledDenoForYoutubeEjsWhenAvailable();
     rejectsEmptyAndNonHttpUrls();
     parsesErrorLinesFromYtDlpOutput();
+    parsesYtDlpCliErrorLines();
     extractsPrintedDownloadedFileFromOutput();
     defaultDownloadDirectoryIgnoresHostWorkingDirectory();
     flStudioMruChoosesFirstExistingFlp();

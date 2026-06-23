@@ -464,8 +464,10 @@ juce::StringArray buildYtDlpCommand (const juce::String& url,
     const auto deno = findBundledExecutable ("deno", toolDirectory);
 
     command.add (resolveExecutableForChildProcess ("uvx", toolDirectory));
-    command.add ("--from");
+    command.add ("--refresh-package");
     command.add ("yt-dlp");
+    command.add ("--from");
+    command.add ("yt-dlp@latest");
     command.add ("yt-dlp");
 
     if (deno.existsAsFile())

@@ -7,7 +7,7 @@ StashTrack is a JUCE audio plug-in that lets you paste a YouTube or other yt-dlp
 Publisher: N9 Records
 Website: https://stashtrack.n9records.com
 Support: vsts@n9records.com
-Version: v0.1
+Version: v0.2
 Copyright: Copyright (c) 2026 N9 Records
 License: StashTrack Non-Commercial License v0.1. Free to use, copy, modify, and share for non-commercial purposes only. No commercial use or profit is allowed.
 
@@ -36,15 +36,15 @@ build-vs/StashTrack_artefacts/Release/VST3/StashTrack.vst3/Contents/x86_64-win/
 The downloader uses a command shaped like this:
 
 ```bash
-uvx --from yt-dlp yt-dlp -f bestaudio -x --audio-format wav --print after_move:filepath --output "<downloadFolder>/%(title)s.%(ext)s" <URL>
+uvx --refresh-package yt-dlp --from yt-dlp@latest yt-dlp -f bestaudio -x --audio-format wav --print after_move:filepath --output "<downloadFolder>/%(title)s.%(ext)s" <URL>
 ```
 
-The plug-in requests `bestaudio`, then converts to WAV so JUCE's built-in `AudioFormatManager` can reliably load the result. On first use, `uvx` may download/cache yt-dlp.
+The plug-in requests `bestaudio`, then converts to WAV so JUCE's built-in `AudioFormatManager` can reliably load the result. StashTrack forces `uvx` to refresh yt-dlp metadata and run `yt-dlp@latest` so a stale cached yt-dlp build does not break newer YouTube options.
 
 When `Clip` is enabled, StashTrack prefers segmented m3u8 media before falling back to `bestaudio`:
 
 ```bash
-uvx --from yt-dlp yt-dlp --js-runtimes "deno:<pluginToolsFolder>/deno.exe" --remote-components ejs:npm -f "best[protocol*=m3u8][height<=360]/best[protocol*=m3u8]/bestaudio" --download-sections "*<start>-<end>"
+uvx --refresh-package yt-dlp --from yt-dlp@latest yt-dlp --js-runtimes "deno:<pluginToolsFolder>/deno.exe" --remote-components ejs:npm -f "best[protocol*=m3u8][height<=360]/best[protocol*=m3u8]/bestaudio" --download-sections "*<start>-<end>"
 ```
 
 This requires ffmpeg. Deno lets yt-dlp solve YouTube's current JavaScript challenges and expose m3u8 segment streams when YouTube provides them. Segment streams are much better for grabbing a short clip from a long video. If a site only exposes a single giant DASH/HTTP audio file, yt-dlp/ffmpeg may still need to scan or download more data because that is a site/format limitation.
@@ -121,13 +121,13 @@ bun run typecheck
 bun run build
 ```
 
-The landing page download buttons point to the v0.1 GitHub Release installer:
+The landing page download buttons point to the v0.2 GitHub Release installer:
 
 ```text
-https://github.com/davad00/StashTrack/releases/download/v0.1/StashTrackv0.1Setup.exe
+https://github.com/davad00/StashTrack/releases/download/v0.2/StashTrackv0.2Setup.exe
 ```
 
-After rebuilding `dist/StashTrackSetup.exe`, upload the renamed release asset to GitHub Releases and update `stashtrack-landing/app/page.tsx` if the release URL changes.
+After rebuilding `dist/StashTrackv0.2Setup.exe`, upload the release asset to GitHub Releases and update `stashtrack-landing/app/page.tsx` if the release URL changes.
 
 ## License
 
@@ -163,10 +163,10 @@ powershell -NoProfile -ExecutionPolicy Bypass -File installer/windows/build-inst
 The installer is written to:
 
 ```text
-dist/StashTrackSetup.exe
+dist/StashTrackv0.2Setup.exe
 ```
 
-`StashTrackSetup.exe` installs to the standard system VST3 folder:
+`StashTrackv0.2Setup.exe` installs to the standard system VST3 folder:
 
 ```text
 C:\Program Files\Common Files\VST3\StashTrack.vst3
