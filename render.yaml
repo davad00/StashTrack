@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: stashtrack-landing
+    runtime: node
+    plan: free
+    rootDir: stashtrack-landing
+    buildCommand: bun install --frozen-lockfile && bun run build
+    startCommand: bun run start -- -H 0.0.0.0 -p $PORT
+    healthCheckPath: /
+    domains:
+      - stashtrack.n9records.com
+    buildFilter:
+      paths:
+        - stashtrack-landing/**
+        - render.yaml

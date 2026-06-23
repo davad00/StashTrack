@@ -1,0 +1,55 @@
+# OS/editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.suo
+*.user
+*.vcxproj.user
+.vs/
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Node/Bun/Next
+node_modules/
+**/node_modules/
+.next/
+**/.next/
+out/
+**/out/
+
+# v0 sandbox internal files
+__v0_runtime_loader.js
+__v0_devtools.tsx
+__v0_jsx-dev-runtime.ts
+.snowflake/
+.v0-trash/
+.vercel/
+.agents/
+docs/superpowers/
+
+# CMake/JUCE builds
+build/
+build-*/
+build-vs/
+cmake-build-*/
+CMakeCache.txt
+CMakeFiles/
+_deps/
+
+# Bundled/generated installer artifacts
+dist/
+installer/windows/cache/
+installer/windows/staging/
+
+# Generated JS UI bundle
+jsui/build/
+
+# Logs and temporary archives
+*.log
+*.tmp
+*.zip
+*.tsbuildinfo

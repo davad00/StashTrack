@@ -1,0 +1,700 @@
+.page {
+  --bg: #0a0b0a;
+  --panel: #101210;
+  --panel-2: #14170f;
+  --well: #0c0e0c;
+  --line: rgba(255, 255, 255, 0.11);
+  --line-strong: rgba(198, 241, 53, 0.48);
+  --accent: #c6f135;
+  --accent-soft: rgba(198, 241, 53, 0.1);
+  --text: #e8eae6;
+  --muted: #9aa097;
+  --muted-2: #70776d;
+  min-height: 100dvh;
+  color: var(--text);
+  background:
+    repeating-linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.035) 0,
+      rgba(255, 255, 255, 0.035) 1px,
+      transparent 1px,
+      transparent 88px
+    ),
+    repeating-linear-gradient(
+      0deg,
+      rgba(255, 255, 255, 0.025) 0,
+      rgba(255, 255, 255, 0.025) 1px,
+      transparent 1px,
+      transparent 88px
+    ),
+    var(--bg);
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+}
+
+.page::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image: linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 100% 3px;
+  opacity: 0.24;
+  z-index: 1;
+}
+
+.page > * {
+  position: relative;
+  z-index: 2;
+}
+
+.skipLink {
+  position: fixed;
+  left: 1rem;
+  top: 1rem;
+  transform: translateY(-160%);
+  background: var(--accent);
+  color: var(--bg);
+  padding: 0.75rem 1rem;
+  z-index: 20;
+}
+
+.skipLink:focus {
+  transform: translateY(0);
+}
+
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 1rem;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid var(--line);
+  background: rgba(10, 11, 10, 0.92);
+  backdrop-filter: blur(12px);
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  font-weight: 700;
+}
+
+.mark {
+  width: 0.875rem;
+  height: 0.875rem;
+  display: inline-block;
+  background: var(--accent);
+  box-shadow: 0.42rem 0 0 -0.18rem var(--bg), 0.84rem 0 0 var(--accent);
+}
+
+.version {
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  padding: 0.08rem 0.35rem;
+  font-size: 0.72rem;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+}
+
+.navLinks {
+  display: none;
+  gap: 1.2rem;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.navLinks a,
+.footer a,
+.finalCta a:not(.primaryButton) {
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 0.25rem;
+  transition: color 180ms ease, text-decoration-color 180ms ease;
+}
+
+.navLinks a:hover,
+.footer a:hover,
+.finalCta a:not(.primaryButton):hover {
+  color: var(--accent);
+  text-decoration-color: var(--accent);
+}
+
+.navButton,
+.primaryButton,
+.secondaryButton,
+.urlMock button,
+.dragSource button {
+  min-height: 2.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--accent);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  font-weight: 700;
+  transition:
+    transform 180ms ease,
+    background-color 180ms ease,
+    color 180ms ease,
+    border-color 180ms ease;
+}
+
+.navButton,
+.primaryButton,
+.urlMock button {
+  background: var(--accent);
+  color: var(--bg);
+}
+
+.secondaryButton,
+.dragSource button {
+  background: transparent;
+  color: var(--accent);
+}
+
+.navButton {
+  padding: 0.65rem 0.9rem;
+  font-size: 0.8rem;
+}
+
+.primaryButton,
+.secondaryButton {
+  padding: 0.85rem 1.25rem;
+}
+
+.navButton:hover,
+.primaryButton:hover,
+.secondaryButton:hover,
+.urlMock button:hover,
+.dragSource button:hover {
+  transform: translateY(-2px);
+}
+
+.secondaryButton:hover,
+.dragSource button:hover {
+  background: var(--accent);
+  color: var(--bg);
+}
+
+.navButton:active,
+.primaryButton:active,
+.secondaryButton:active,
+.urlMock button:active,
+.dragSource button:active {
+  transform: translateY(1px);
+}
+
+.hero,
+.stats,
+.workflow,
+.split,
+.dragLab,
+.install,
+.finalCta,
+.footer {
+  width: min(100% - 2rem, 1180px);
+  margin-inline: auto;
+}
+
+.hero {
+  min-height: calc(100dvh - 4.75rem);
+  display: grid;
+  align-items: center;
+  gap: 2rem;
+  padding: 3rem 0 4rem;
+}
+
+.heroCopy {
+  max-width: 45rem;
+  min-width: 0;
+}
+
+.kicker {
+  color: var(--accent);
+  font-size: 0.78rem;
+  margin-bottom: 1rem;
+}
+
+.title,
+.sectionIntro h2,
+.finalCta h2 {
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  font-weight: 800;
+  line-height: 1;
+  text-wrap: balance;
+}
+
+.title {
+  max-width: 11ch;
+  font-size: 3.5rem;
+}
+
+.lede,
+.sectionIntro p,
+.note,
+.finalCta p,
+.footer p {
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.lede {
+  max-width: 54ch;
+  margin-top: 1.4rem;
+  font-size: 1rem;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin-top: 1.8rem;
+}
+
+.note {
+  max-width: 42rem;
+  margin-top: 1.4rem;
+  padding-left: 0.8rem;
+  border-left: 2px solid var(--accent);
+  font-size: 0.82rem;
+}
+
+.pluginFrame {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  box-shadow: 0 30px 80px -48px rgba(0, 0, 0, 0.9);
+}
+
+.windowBar {
+  min-height: 2.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.7rem 0.9rem;
+  border-bottom: 1px solid var(--line);
+  background: var(--well);
+}
+
+.windowDot {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background: #2d322a;
+}
+
+.windowTitle {
+  margin-left: auto;
+  color: var(--muted-2);
+  font-size: 0.78rem;
+}
+
+.pluginBody {
+  min-width: 0;
+  padding: 1.2rem;
+}
+
+.pluginTop,
+.waveHeader,
+.clipRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.pluginName {
+  color: var(--text);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  font-weight: 800;
+  font-size: 1.35rem;
+}
+
+.pluginStatus,
+.check {
+  color: var(--accent);
+}
+
+.mockLabel {
+  display: block;
+  margin-top: 1.3rem;
+  margin-bottom: 0.35rem;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.urlMock {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+}
+
+.urlMock span {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  border: 1px solid var(--line);
+  background: var(--well);
+  padding: 0.85rem;
+  color: var(--text);
+}
+
+.urlMock button {
+  padding-inline: 1.25rem;
+}
+
+.clipRow {
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  margin: 1rem 0;
+  padding: 0.7rem 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.wavePanel,
+.clipVisual,
+.dragSource,
+.track {
+  min-width: 0;
+  border: 1px solid var(--line);
+  background: var(--well);
+}
+
+.wavePanel {
+  padding: 1rem;
+}
+
+.wave,
+.waveCompact {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  width: 100%;
+}
+
+.wave {
+  height: 8rem;
+  margin-top: 1rem;
+}
+
+.waveCompact {
+  height: 3.5rem;
+}
+
+.waveBar {
+  flex: 1;
+  min-width: 2px;
+  background: linear-gradient(to top, #526319, var(--accent));
+  transform-origin: center;
+  animation: wavePulse 1.8s ease-in-out infinite;
+}
+
+@keyframes wavePulse {
+  0%,
+  100% {
+    opacity: 0.62;
+    transform: scaleY(0.55);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+}
+
+.stats {
+  display: grid;
+  border: 1px solid var(--line);
+  background: var(--line);
+  gap: 1px;
+  margin-bottom: 3rem;
+}
+
+.stat {
+  background: var(--panel);
+  padding: 1.1rem;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.stat span {
+  color: var(--accent);
+  font-size: 0.78rem;
+}
+
+.stat strong {
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  font-size: 1.15rem;
+}
+
+.workflow,
+.split,
+.dragLab,
+.install,
+.finalCta {
+  padding: 4.25rem 0;
+  border-top: 1px solid var(--line);
+}
+
+.sectionIntro {
+  max-width: 45rem;
+}
+
+.sectionIntro h2,
+.finalCta h2 {
+  font-size: 2.35rem;
+}
+
+.sectionIntro p:not(.kicker) {
+  margin-top: 1rem;
+  max-width: 56ch;
+}
+
+.steps {
+  list-style: none;
+  padding: 0;
+  margin-top: 2rem;
+  display: grid;
+  gap: 1px;
+  border: 1px solid var(--line);
+  background: var(--line);
+}
+
+.step {
+  background: var(--panel);
+  padding: 1.25rem;
+  display: grid;
+  gap: 0.5rem;
+  transition: background-color 180ms ease;
+}
+
+.step:hover {
+  background: var(--panel-2);
+}
+
+.stepIndex {
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.step h3 {
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  font-size: 1.2rem;
+}
+
+.step p {
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+.split,
+.dragLab,
+.install {
+  display: grid;
+  gap: 2rem;
+}
+
+.clipVisual {
+  position: relative;
+  padding: 2rem 1.25rem;
+  overflow: hidden;
+}
+
+.clipVisual .waveBar {
+  animation: none;
+  background: #3d471f;
+}
+
+.clipWindow {
+  position: absolute;
+  inset: 1.35rem 20% 1.35rem 22%;
+  border: 1px solid var(--accent);
+  background: var(--accent-soft);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding-top: 0.55rem;
+  color: var(--accent);
+  font-size: 0.78rem;
+}
+
+.dragDemo {
+  display: grid;
+  gap: 1rem;
+}
+
+.dragSource,
+.track {
+  padding: 1rem;
+  min-height: 8.5rem;
+}
+
+.dragSource {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.dragSource > span {
+  color: var(--accent);
+}
+
+.dragSource button {
+  width: fit-content;
+  padding: 0.65rem 1rem;
+}
+
+.track {
+  display: grid;
+  place-items: center;
+  border-style: dashed;
+  color: var(--muted-2);
+}
+
+.track[data-filled="true"] {
+  border-style: solid;
+  border-color: var(--line-strong);
+  color: var(--accent);
+}
+
+.installList {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 1px;
+  border: 1px solid var(--line);
+  background: var(--line);
+}
+
+.installList li {
+  background: var(--panel);
+  padding: 1rem;
+  color: var(--text);
+}
+
+.installList li::before {
+  content: ">";
+  color: var(--accent);
+  margin-right: 0.6rem;
+}
+
+.finalCta {
+  display: grid;
+  justify-items: start;
+  gap: 1rem;
+}
+
+.finalCta h2 {
+  max-width: 14ch;
+}
+
+.finalCta p {
+  margin: 0;
+}
+
+.footer {
+  display: grid;
+  gap: 0.75rem;
+  padding: 2rem 0 3rem;
+  border-top: 1px solid var(--line);
+  font-size: 0.86rem;
+}
+
+.footer p {
+  margin: 0;
+}
+
+@media (min-width: 720px) {
+  .nav {
+    grid-template-columns: auto 1fr auto;
+    padding: 1rem 1.5rem;
+  }
+
+  .navLinks {
+    display: flex;
+    justify-content: center;
+  }
+
+  .title {
+    font-size: 5rem;
+  }
+
+  .stats {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .steps {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .dragDemo {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .urlMock {
+    grid-template-columns: 1fr auto;
+  }
+}
+
+@media (min-width: 980px) {
+  .hero {
+    grid-template-columns: 1fr 0.95fr;
+    gap: 4rem;
+    padding-top: 4.5rem;
+  }
+
+  .split,
+  .dragLab,
+  .install {
+    grid-template-columns: 0.85fr 1.15fr;
+    align-items: center;
+  }
+
+  .sectionIntro h2,
+  .finalCta h2 {
+    font-size: 3.25rem;
+  }
+
+  .pluginBody {
+    padding: 1.45rem;
+  }
+}
+
+@media (max-width: 430px) {
+  .title {
+    font-size: 3rem;
+  }
+
+  .primaryButton,
+  .secondaryButton {
+    width: 100%;
+  }
+
+  .clipWindow {
+    inset-inline: 16%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .waveBar {
+    animation: none;
+  }
+
+  .navButton,
+  .primaryButton,
+  .secondaryButton,
+  .urlMock button,
+  .dragSource button,
+  .step {
+    transition: none;
+  }
+}

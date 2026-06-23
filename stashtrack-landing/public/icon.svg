@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="StashTrack">
+  <rect width="64" height="64" fill="#0A0B0A"/>
+  <rect x="14" y="14" width="10" height="36" fill="#C6F135"/>
+  <rect x="30" y="22" width="10" height="28" fill="#C6F135"/>
+  <rect x="46" y="8" width="10" height="42" fill="#C6F135"/>
+  <rect x="14" y="54" width="42" height="3" fill="#E8EAE6"/>
+</svg>
