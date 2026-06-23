@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react'
 import styles from './page.module.css'
 
 const SUPPORT_EMAIL = 'vsts@n9records.com'
-const DOWNLOAD_URL = '/downloads/StashTrackSetup.exe'
+const DOWNLOAD_URL = '/downloads/StashTrackv0.1Setup.exe'
 
 const bars = Array.from({ length: 84 }, (_, index) => {
   const a = Math.sin(index * 0.47) * 0.5 + 0.5
@@ -65,7 +65,7 @@ export default function Home() {
           <a href="#install">Install</a>
           <a href={`mailto:${SUPPORT_EMAIL}`}>Support</a>
         </nav>
-        <a className={styles.navButton} href={DOWNLOAD_URL} download="StashTrackSetup.exe">
+        <a className={styles.navButton} href={DOWNLOAD_URL} download="StashTrackv0.1Setup.exe">
           Get installer
         </a>
       </header>
@@ -80,7 +80,7 @@ export default function Home() {
             file drag for your FL Studio playlist.
           </p>
           <div className={styles.actions}>
-            <a className={styles.primaryButton} href={DOWNLOAD_URL} download="StashTrackSetup.exe">
+            <a className={styles.primaryButton} href={DOWNLOAD_URL} download="StashTrackv0.1Setup.exe">
               Download StashTrack v0.1
             </a>
             <a className={styles.secondaryButton} href="#workflow">
@@ -216,7 +216,7 @@ export default function Home() {
       <section id="download" className={styles.finalCta}>
         <p className={styles.kicker}>stashtrack.n9records.com</p>
         <h2>Keep the browser out of the beat.</h2>
-        <a className={styles.primaryButton} href={DOWNLOAD_URL} download="StashTrackSetup.exe">
+        <a className={styles.primaryButton} href={DOWNLOAD_URL} download="StashTrackv0.1Setup.exe">
           Get StashTrack v0.1
         </a>
         <p>

@@ -123,10 +123,16 @@ bun run build
 The landing page serves the Windows installer directly from:
 
 ```text
-stashtrack-landing/public/downloads/StashTrackSetup.exe
+stashtrack-landing/public/downloads/StashTrackv0.1Setup.exe
 ```
 
 After rebuilding `dist/StashTrackSetup.exe`, copy it to that path before pushing if you want the website download button to ship the newest installer.
+
+The v0.1 release asset is also published at:
+
+```text
+https://github.com/davad00/StashTrack/releases/download/v0.1/StashTrackv0.1Setup.exe
+```
 
 ## Build
 

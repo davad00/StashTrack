@@ -7,7 +7,7 @@ $renderYaml = Get-Content -Raw (Join-Path $root "render.yaml")
 $landingPackage = Get-Content -Raw (Join-Path $root "stashtrack-landing/package.json")
 $landingNextConfig = Get-Content -Raw (Join-Path $root "stashtrack-landing/next.config.mjs")
 $landingPage = Get-Content -Raw (Join-Path $root "stashtrack-landing/app/page.tsx")
-$landingInstaller = Join-Path $root "stashtrack-landing/public/downloads/StashTrackSetup.exe"
+$landingInstaller = Join-Path $root "stashtrack-landing/public/downloads/StashTrackv0.1Setup.exe"
 
 function Assert-Contains {
     param(
@@ -46,7 +46,7 @@ Assert-Contains $renderYaml 'stashtrack.n9records.com' 'Render Blueprint must co
 Assert-Contains $landingPackage '"packageManager": "bun@' 'Landing package must declare Bun as the package manager.'
 Assert-Contains $landingPackage '"build": "next build"' 'Landing package must expose the Next build script.'
 Assert-Contains $landingPackage '"start": "next start"' 'Landing package must expose the Next start script.'
-Assert-Contains $landingPage "const DOWNLOAD_URL = '/downloads/StashTrackSetup.exe'" 'Landing page must download the bundled installer from the same site.'
+Assert-Contains $landingPage "const DOWNLOAD_URL = '/downloads/StashTrackv0.1Setup.exe'" 'Landing page must download the bundled v0.1 installer from the same site.'
 
 if ($renderYaml.Contains('runtime: static') -or $renderYaml.Contains('staticPublishPath:')) {
     throw 'Render Blueprint must not be configured as a static site.'

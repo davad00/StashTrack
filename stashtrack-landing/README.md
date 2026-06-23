@@ -35,13 +35,19 @@ bun run start -- -H 0.0.0.0 -p 3000
 The download buttons point to the same-origin installer:
 
 ```text
-/downloads/StashTrackSetup.exe
+/downloads/StashTrackv0.1Setup.exe
 ```
 
 Keep this file in sync with the latest root build output:
 
 ```text
-public/downloads/StashTrackSetup.exe
+public/downloads/StashTrackv0.1Setup.exe
+```
+
+The v0.1 GitHub Release asset mirrors the same installer:
+
+```text
+https://github.com/davad00/StashTrack/releases/download/v0.1/StashTrackv0.1Setup.exe
 ```
 
 ## Render
