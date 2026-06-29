@@ -575,18 +575,38 @@ void YouTubeGrabberAudioProcessorEditor::updateCheckFinished (StashTrack::Update
                        + " is available.\n\nDownload and open the installer now? "
                          "Close FL Studio before finishing the installer so the loaded VST3 can be replaced.";
 
-    juce::AlertWindow::showOkCancelBox (
-        juce::AlertWindow::InfoIcon,
-        "StashTrack update available",
-        message,
-        "Download update",
-        "Later",
-        this,
-        juce::ModalCallbackFunction::create ([safeThis, latest] (int resultCode)
+    const auto changelogUrl = StashTrack::getReleaseChangelogUrl (latest);
+    auto* alert = new juce::AlertWindow ("StashTrack update available",
+                                         message,
+                                         juce::AlertWindow::InfoIcon);
+
+    alert->addButton ("Download update", 1);
+
+    if (changelogUrl.isNotEmpty())
+        alert->addButton ("Changelog", 2);
+
+    alert->addButton ("Later", 0);
+    alert->setAlwaysOnTop (true);
+    alert->enterModalState (
+        true,
+        juce::ModalCallbackFunction::create ([safeThis, latest, changelogUrl] (int resultCode)
         {
-            if (safeThis != nullptr && resultCode != 0)
+            if (safeThis == nullptr)
+                return;
+
+            if (resultCode == 1)
+            {
                 safeThis->startUpdateInstallerDownload (latest);
-        }));
+                return;
+            }
+
+            if (resultCode == 2 && changelogUrl.isNotEmpty())
+            {
+                juce::URL (changelogUrl).launchInDefaultBrowser();
+                safeThis->setStatus ("Opened changelog for " + latest.versionTag, kMuted);
+            }
+        }),
+        true);
 }
 
 void YouTubeGrabberAudioProcessorEditor::startUpdateInstallerDownload (StashTrack::LatestReleaseInfo latest)

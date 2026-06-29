@@ -94,6 +94,46 @@ namespace
                 "long YouTube clips should prefer segment streams so yt-dlp can avoid linear DASH seeks where available");
     }
 
+    void clippedDownloadsIncludeTimeRangeInOutputFilename()
+    {
+        const auto folder = juce::File::getSpecialLocation (juce::File::tempDirectory)
+                                .getChildFile ("StashTrackTests");
+
+        StashTrack::DownloadOptions firstClip;
+        firstClip.section.enabled = true;
+        firstClip.section.startTime = "1:23:45";
+        firstClip.section.endTime = "1:24:00";
+
+        StashTrack::DownloadOptions secondClip;
+        secondClip.section.enabled = true;
+        secondClip.section.startTime = "1:24:01";
+        secondClip.section.endTime = "1:24:30";
+
+        const auto firstCommand = StashTrack::buildYtDlpCommand (
+            "https://www.youtube.com/watch?v=hsGOT_0L16U",
+            folder,
+            firstClip);
+
+        const auto secondCommand = StashTrack::buildYtDlpCommand (
+            "https://www.youtube.com/watch?v=hsGOT_0L16U",
+            folder,
+            secondClip);
+
+        const auto firstOutput = firstCommand[firstCommand.indexOf ("--output") + 1];
+        const auto secondOutput = secondCommand[secondCommand.indexOf ("--output") + 1];
+        const auto firstFileName = juce::File (firstOutput).getFileName();
+        const auto secondFileName = juce::File (secondOutput).getFileName();
+
+        expect (firstFileName.contains ("[clip 1-23-45 to 1-24-00]"),
+                "clipped output filename should include a Windows-safe start/end range");
+        expect (secondFileName.contains ("[clip 1-24-01 to 1-24-30]"),
+                "a second clip from the same source should get its own output filename");
+        expect (firstOutput != secondOutput,
+                "different clip ranges from the same source should not reuse the same yt-dlp output path");
+        expect (! firstFileName.containsChar (':') && ! secondFileName.containsChar (':'),
+                "clip time ranges in filenames must not contain Windows-invalid colon characters");
+    }
+
     void commandPrefersBundledYtDlpForYoutubeEjsWhenAvailable()
     {
         const auto folder = juce::File::getSpecialLocation (juce::File::tempDirectory)
@@ -413,6 +453,20 @@ namespace
                 "release parser should keep the release page URL");
     }
 
+    void releaseInfoExposesHttpsChangelogUrl()
+    {
+        StashTrack::LatestReleaseInfo release;
+        release.releasePageUrl = " https://github.com/davad00/StashTrack/releases/tag/v0.6 ";
+
+        expect (StashTrack::getReleaseChangelogUrl (release).endsWith ("/v0.6"),
+                "updater prompt should expose the GitHub release page as the changelog URL");
+
+        release.releasePageUrl = "http://example.com/not-secure";
+
+        expect (StashTrack::getReleaseChangelogUrl (release).isEmpty(),
+                "updater prompt should not expose a non-https changelog URL");
+    }
+
     void rejectsReleaseJsonWithoutInstaller()
     {
         const auto release = StashTrack::parseLatestReleaseJson (R"json(
@@ -448,6 +502,7 @@ int main()
     commandContainsExpectedYtDlpOptions();
     commandContainsDownloadSectionWhenRequested();
     longYoutubeClipUsesFfmpegSectionDownload();
+    clippedDownloadsIncludeTimeRangeInOutputFilename();
     commandPrefersBundledYtDlpForYoutubeEjsWhenAvailable();
     uvxFallbackDoesNotUseBundledDenoOnlyOptions();
     rejectsEmptyAndNonHttpUrls();
@@ -464,6 +519,7 @@ int main()
     normalisesVersionTagsForDisplayAndComparison();
     comparesSemanticVersions();
     parsesGitHubLatestReleaseJson();
+    releaseInfoExposesHttpsChangelogUrl();
     rejectsReleaseJsonWithoutInstaller();
     updaterDownloadFileUsesDownloadsFolderAndVersion();
 

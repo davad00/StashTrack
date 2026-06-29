@@ -1,6 +1,6 @@
-export const FALLBACK_VERSION_TAG = 'v0.5'
+export const FALLBACK_VERSION_TAG = 'v0.6'
 export const FALLBACK_INSTALLER_URL =
-  'https://github.com/davad00/StashTrack/releases/download/v0.5/StashTrackv0.5Setup.exe'
+  'https://github.com/davad00/StashTrack/releases/download/v0.6/StashTrackv0.6Setup.exe'
 
 type GitHubReleaseAsset = {
   name: string

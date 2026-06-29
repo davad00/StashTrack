@@ -141,6 +141,24 @@ namespace
             && value >= 0.0;
     }
 
+    juce::String makeClipTimeFilenameSafe (juce::String time)
+    {
+        return time.trim()
+                   .replaceCharacters (":/\\*?\"<>|", "---------")
+                   .replaceCharacter (' ', '-');
+    }
+
+    juce::String getOutputTemplateName (const DownloadOptions& options)
+    {
+        if (! options.section.enabled)
+            return "%(title)s.%(ext)s";
+
+        const auto start = makeClipTimeFilenameSafe (options.section.startTime);
+        const auto end = makeClipTimeFilenameSafe (options.section.endTime);
+
+        return "%(title)s [clip " + start + " to " + end + "].%(ext)s";
+    }
+
     bool activeTitleLooksUnsaved (const juce::String& title)
     {
         return title.containsIgnoreCase ("FL Studio")
@@ -514,7 +532,7 @@ juce::StringArray buildYtDlpCommand (const juce::String& url,
     }
 
     command.add ("--output");
-    command.add (downloadFolder.getChildFile ("%(title)s.%(ext)s").getFullPathName());
+    command.add (downloadFolder.getChildFile (getOutputTemplateName (options)).getFullPathName());
     command.add (url.trim());
 
     return command;

@@ -95,6 +95,12 @@ bool isVersionNewer (const juce::String& currentVersion,
     return false;
 }
 
+juce::String getReleaseChangelogUrl (const LatestReleaseInfo& release)
+{
+    const auto url = release.releasePageUrl.trim();
+    return url.startsWithIgnoreCase ("https://") ? url : juce::String();
+}
+
 LatestReleaseInfo parseLatestReleaseJson (const juce::String& jsonText)
 {
     LatestReleaseInfo info;

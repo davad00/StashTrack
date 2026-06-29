@@ -30,6 +30,7 @@ namespace StashTrack
     juce::String normaliseVersionTag (const juce::String& version);
     bool isVersionNewer (const juce::String& currentVersion,
                          const juce::String& candidateVersion);
+    juce::String getReleaseChangelogUrl (const LatestReleaseInfo& release);
     LatestReleaseInfo parseLatestReleaseJson (const juce::String& jsonText);
     LatestReleaseInfo fetchLatestReleaseInfo();
     UpdateCheckResult checkForUpdate (const juce::String& currentVersion);

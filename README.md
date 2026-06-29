@@ -7,7 +7,7 @@ StashTrack is a JUCE audio plug-in that lets you paste a YouTube or other yt-dlp
 Publisher: N9 Records
 Website: https://stashtrack.n9records.com
 Support: vsts@n9records.com
-Version: v0.5
+Version: v0.6
 Copyright: Copyright (c) 2026 N9 Records
 License: StashTrack Non-Commercial License v0.1. Free to use, copy, modify, and share for non-commercial purposes only. No commercial use or profit is allowed.
 
@@ -79,6 +79,9 @@ Enable `Clip`, then enter `Start` and `End` as seconds, `mm:ss`, or `hh:mm:ss`. 
 ```
 
 The end time must be after the start time. StashTrack validates this before launching yt-dlp.
+Clipped files include the crop range in the saved filename, for example
+`Song Title [clip 1-23-45 to 1-24-00].wav`, so multiple clips from the same
+source video can sit in the same folder without fighting over one output name.
 
 ## React-JUCE UI Bundle
 
@@ -130,7 +133,7 @@ The landing page download buttons point to the site redirect route:
 
 That route asks GitHub for the latest release and redirects to the newest
 `StashTrackv*Setup.exe` asset. After rebuilding
-`dist/StashTrackv0.5Setup.exe`, upload it to GitHub Releases; the landing page
+`dist/StashTrackv0.6Setup.exe`, upload it to GitHub Releases; the landing page
 does not need a code edit for future installer version changes as long as the
 asset filename keeps that pattern.
 
@@ -143,7 +146,8 @@ When the plug-in editor opens, StashTrack checks the latest GitHub Release on a
 background thread. If the release tag is newer than the running
 `JucePlugin_VersionString`, it prompts the user to download the installer. When
 accepted, StashTrack downloads the newest `StashTrackv*Setup.exe` to the user's
-Downloads folder and opens it.
+Downloads folder and opens it. The update prompt also includes a Changelog
+button that opens the GitHub release notes for the available version.
 
 The installer cannot safely replace a VST3 binary while the DAW has it loaded,
 so the user still needs to close FL Studio before completing setup, then reopen
@@ -183,10 +187,10 @@ powershell -NoProfile -ExecutionPolicy Bypass -File installer/windows/build-inst
 The installer is written to:
 
 ```text
-dist/StashTrackv0.5Setup.exe
+dist/StashTrackv0.6Setup.exe
 ```
 
-`StashTrackv0.5Setup.exe` installs to the standard system VST3 folder:
+`StashTrackv0.6Setup.exe` installs to the standard system VST3 folder:
 
 ```text
 C:\Program Files\Common Files\VST3\StashTrack.vst3

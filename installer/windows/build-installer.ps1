@@ -32,7 +32,7 @@ $dist = Join-Path $root "dist"
 
 $pluginSource = Join-Path $BuildDir "StashTrack_artefacts\$Configuration\VST3\StashTrack.vst3"
 $pluginDestination = Join-Path $payload "StashTrack.vst3"
-$setupOutput = Join-Path $dist "StashTrackv0.5Setup.exe"
+$setupOutput = Join-Path $dist "StashTrackv0.6Setup.exe"
 
 function Get-FullPath {
     param([string] $Path)
@@ -339,7 +339,7 @@ function Write-StagingDocuments {
     @"
 StashTrack VST3 Plug-in
 Publisher: N9 Records
-Version: v0.5
+Version: v0.6
 Website: https://stashtrack.n9records.com
 Support: vsts@n9records.com
 
@@ -414,7 +414,7 @@ if (Test-Path -LiteralPath $setupOutput) {
 
 $iscc = Ensure-InnoCompiler
 
-Write-Host "Compiling StashTrackv0.5Setup.exe..."
+Write-Host "Compiling StashTrackv0.6Setup.exe..."
 Push-Location $installerRoot
 try {
     & $iscc "StashTrack.iss"
