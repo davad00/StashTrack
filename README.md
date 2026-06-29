@@ -132,10 +132,17 @@ The landing page download buttons point to the site redirect route:
 ```
 
 That route asks GitHub for the latest release and redirects to the newest
-`StashTrackv*Setup.exe` asset. After rebuilding
-`dist/StashTrackv0.6Setup.exe`, upload it to GitHub Releases; the landing page
-does not need a code edit for future installer version changes as long as the
-asset filename keeps that pattern.
+`StashTrackv*Setup.exe` asset. If GitHub's JSON API is unavailable, it falls
+back to GitHub's `/releases/latest` redirect to infer the newest tag, then uses
+the predictable versioned installer URL. As a final safety fallback, each
+release should also upload a second copy named `StashTrackSetup.exe`; GitHub's
+versionless `releases/latest/download/StashTrackSetup.exe` URL will always
+resolve to the newest release with that asset name.
+
+After rebuilding `dist/StashTrackv0.6Setup.exe`, upload it to GitHub Releases
+both as `StashTrackv0.6Setup.exe` and as `StashTrackSetup.exe`. Future installer
+version changes should not need a Render deploy as long as the release tag and
+asset filenames keep those patterns.
 
 Visible version labels on the landing page call `/api/latest-release`, which
 uses the same GitHub latest-release resolver.

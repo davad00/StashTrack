@@ -13,7 +13,6 @@ $landingLatestReleaseRoute = Get-Content -Raw (Join-Path $root "stashtrack-landi
 $landingGithubReleaseLib = Get-Content -Raw (Join-Path $root "stashtrack-landing/lib/githubRelease.ts")
 $downloadRoutePath = "/download/windows"
 $latestReleaseApiPath = "/api/latest-release"
-$fallbackInstallerUrl = "https://github.com/davad00/StashTrack/releases/download/v0.6/StashTrackv0.6Setup.exe"
 
 function Assert-Contains {
     param(
@@ -62,9 +61,11 @@ Assert-Contains $landingPage "useState('latest')" 'Landing page must not hard-co
 Assert-Contains $landingDownloadRoute 'getLatestInstallerRelease' 'Download route must use the shared latest-release resolver.'
 Assert-Contains $landingLatestReleaseRoute 'getLatestInstallerRelease' 'Latest-release API route must use the shared latest-release resolver.'
 Assert-Contains $landingLatestReleaseRoute "downloadUrl: '$downloadRoutePath'" 'Latest-release API route must expose the stable download path.'
-Assert-Contains $landingGithubReleaseLib 'https://api.github.com/repos/davad00/StashTrack/releases/latest' 'Shared release resolver must query the latest GitHub Release.'
-Assert-Contains $landingGithubReleaseLib $fallbackInstallerUrl 'Shared release resolver must keep a known-good fallback installer URL.'
+Assert-Contains $landingGithubReleaseLib 'https://api.github.com/repos/${GITHUB_REPO}/releases/latest' 'Shared release resolver must query the latest GitHub Release.'
+Assert-Contains $landingGithubReleaseLib 'https://github.com/${GITHUB_REPO}/releases/latest' 'Shared release resolver must query GitHub latest redirect when the API fails.'
+Assert-Contains $landingGithubReleaseLib 'releases/latest/download/${STABLE_INSTALLER_ASSET_NAME}' 'Shared release resolver must keep a versionless latest-download fallback installer URL.'
 Assert-Contains $landingGithubReleaseLib 'StashTrackv.+Setup\.exe' 'Shared release resolver must find versioned StashTrack installer assets.'
+Assert-Contains $landingGithubReleaseLib 'StashTrackSetup.exe' 'Shared release resolver must support a stable latest installer asset name.'
 
 if ($landingPage.Contains('github.com/davad00/StashTrack/releases/download/v')) {
     throw 'Landing page must not hard-code a versioned GitHub Release installer URL.'
