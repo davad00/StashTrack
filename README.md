@@ -83,30 +83,33 @@ Clipped files include the crop range in the saved filename, for example
 `Song Title [clip 1-23-45 to 1-24-00].wav`, so multiple clips from the same
 source video can sit in the same folder without fighting over one output name.
 
-## React-JUCE UI Bundle
+## VSReacT UI (React + TypeScript)
 
-The project vendors React-JUCE under `external/react-juce` and compiles the `react_juce` module into the StashTrack target when `STASHTRACK_ENABLE_REACT_JUCE=ON` (the default). React-JUCE is a JUCE/React bridge, but the waveform and external file drag are intentionally still native JUCE code because the host drag operation must use JUCE's native file-drag API.
+The entire plugin UI is a React + TypeScript app in `jsui-vsreact/`, rendered
+natively by the [VSReacT](../vsreact) framework (no webview): the app runs in
+an embedded QuickJS engine, a custom react-reconciler streams the element tree
+to C++, Yoga computes flexbox layout, and `juce::Graphics` paints every pixel.
+Styling uses Tailwind-style utility classes. Only the waveform + external file
+drag stay native C++ (registered as the `"waveform"` NativeView) because the
+host drag must use JUCE's native file-drag API.
 
-The React-JUCE bundle source lives in `jsui/` and uses Bun, not npm:
+The framework lives one directory up at `../vsreact` (see `VSREACT_DIR` in
+CMake). The UI bundle builds with Bun:
 
 ```powershell
-cd jsui
+cd jsui-vsreact
 bun install
 bun run build
 ```
 
-Or build it through CMake:
+Or through CMake:
 
 ```powershell
-cmake --build build-vs --target StashTrackReactJuceUiBundle --config Release
+cmake --build build-vs --target StashTrackUiBundle --config Release
 ```
 
-If you clone this project somewhere else and `external/react-juce` is missing, restore it with:
-
-```powershell
-git clone --depth 1 https://github.com/JoshMarler/react-juce.git external/react-juce
-git -C external/react-juce submodule update --init --depth 1 react_juce/yoga
-```
+Debug/dev builds watch the bundle file: rebuild it while the plugin is open
+and the UI hot-reloads in place — no DAW restart.
 
 ## Landing Page
 
@@ -174,7 +177,7 @@ This repo expects JUCE to be available at `H:/code/VSTs/JUCE` by default. Overri
 
 ```powershell
 cmake -S . -B build-vs -G "Visual Studio 17 2022" -A x64 -DJUCE_SOURCE_DIR=H:/code/VSTs/JUCE
-cmake --build build-vs --target StashTrackReactJuceUiBundle --config Release
+cmake --build build-vs --target StashTrackUiBundle --config Release
 cmake --build build-vs --target StashTrack_VST3 --config Release
 ctest --test-dir build-vs -C Release --output-on-failure
 ```
@@ -263,9 +266,8 @@ ctest --test-dir build --output-on-failure
 
 - `Source/DownloadUtils.*`: URL validation, yt-dlp command construction, output parsing, and `ChildProcess` execution.
 - `Source/UpdateUtils.*`: latest-release lookup, semantic version comparison, update installer download, and installer launch.
-- `Source/PluginEditor.*`: JUCE GUI with `TextEditor`, `TextButton`, status `Label`, background download thread, message-thread status updates, waveform rendering, and native file drag into the host.
+- `Source/PluginEditor.*`: hosts the VSReacT React UI, the background download thread, message-thread status events, and the native waveform + file-drag component.
 - `Source/PluginProcessor.*`: silent default processor path with retained JUCE audio-loading helpers for future playback workflows.
 - `Tests/DownloadUtilsTests.cpp`: command/URL/output parsing tests.
-- `jsui/`: Bun-built React-JUCE UI bundle source.
+- `jsui-vsreact/`: the React + TypeScript UI app rendered by VSReacT.
 - `stashtrack-landing/`: Bun/Next static landing page for Render.
-- `external/react-juce/`: vendored React-JUCE C++ module.

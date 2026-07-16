@@ -15,17 +15,12 @@ else()
     message(FATAL_ERROR "Set JUCE_SOURCE_DIR to a valid JUCE checkout.")
 endif()
 
+enable_testing()
+
 set(YOUTUBE_GRABBER_FORMATS VST3 Standalone)
 option(STASHTRACK_COPY_PLUGIN_AFTER_BUILD
        "Copy the built plug-in to the system plug-in folder after building"
        OFF)
-option(STASHTRACK_ENABLE_REACT_JUCE
-       "Compile the vendored React-JUCE module into StashTrack"
-       ON)
-set(REACT_JUCE_SOURCE_DIR
-    "${CMAKE_CURRENT_SOURCE_DIR}/external/react-juce"
-    CACHE PATH
-    "Path to a React-JUCE checkout")
 
 if (APPLE)
     list(APPEND YOUTUBE_GRABBER_FORMATS AU)
@@ -68,56 +63,45 @@ target_link_libraries(StashTrack
         juce::juce_recommended_lto_flags
         juce::juce_recommended_warning_flags)
 
-if (STASHTRACK_ENABLE_REACT_JUCE)
-    if (EXISTS "${REACT_JUCE_SOURCE_DIR}/react_juce/react_juce.h")
-        juce_add_module("${REACT_JUCE_SOURCE_DIR}/react_juce")
-        target_include_directories(StashTrack PRIVATE
-            "${REACT_JUCE_SOURCE_DIR}/react_juce")
-        target_compile_definitions(StashTrack PRIVATE
-            STASHTRACK_HAS_REACT_JUCE=1
-            REACTJUCE_USE_DUKTAPE=1
-            STASHTRACK_REACT_JUCE_BUNDLE_PATH="${CMAKE_CURRENT_SOURCE_DIR}/jsui/build/js/main.js")
-        target_link_libraries(StashTrack PRIVATE react_juce)
-
-        if (MSVC)
-            target_compile_options(StashTrack PRIVATE
-                /wd4100
-                /wd4127
-                /wd4244
-                /wd4505
-                /wd4611
-                /wd4702
-                /wd4996)
-        endif()
-    else()
-        message(WARNING "React-JUCE not found at ${REACT_JUCE_SOURCE_DIR}; building native JUCE UI only.")
-    endif()
-endif()
-
 set(VSREACT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../vsreact"
     CACHE PATH
     "Path to the VSReacT framework")
 
-if (EXISTS "${VSREACT_DIR}/CMakeLists.txt")
-    add_subdirectory("${VSREACT_DIR}" vsreact-build)
-    target_link_libraries(StashTrack PRIVATE vsreact)
-    target_compile_definitions(StashTrack PRIVATE
-        STASHTRACK_HAS_VSREACT=1
-        STASHTRACK_VSREACT_BUNDLE_PATH="${VSREACT_DIR}/js/demo/build/main.js")
+if (NOT EXISTS "${VSREACT_DIR}/CMakeLists.txt")
+    message(FATAL_ERROR "VSReacT not found at ${VSREACT_DIR}. Set VSREACT_DIR to the framework checkout.")
+endif()
+
+add_subdirectory("${VSREACT_DIR}" vsreact-build)
+target_link_libraries(StashTrack PRIVATE vsreact)
+target_compile_definitions(StashTrack PRIVATE
+    STASHTRACK_HAS_VSREACT=1
+    STASHTRACK_VSREACT_BUNDLE_PATH="${CMAKE_CURRENT_SOURCE_DIR}/jsui-vsreact/build/main.js")
+
+option(STASHTRACK_VSREACT_DEV
+       "Load the UI bundle from the source tree and hot-reload it on change (turn OFF for installer builds; embeds the bundle instead)"
+       ON)
+
+if (STASHTRACK_VSREACT_DEV)
+    target_compile_definitions(StashTrack PRIVATE STASHTRACK_VSREACT_DEV=1)
 else()
-    message(WARNING "VSReacT not found at ${VSREACT_DIR}; building without it.")
+    if (NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/jsui-vsreact/build/main.js")
+        message(FATAL_ERROR "jsui-vsreact/build/main.js is missing. Build the UI bundle (cd jsui-vsreact; bun install; bun run build) before a production configure.")
+    endif()
+    juce_add_binary_data(StashTrackUiData
+        SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/jsui-vsreact/build/main.js")
+    target_link_libraries(StashTrack PRIVATE StashTrackUiData)
 endif()
 
 find_program(BUN_EXECUTABLE NAMES bun)
 
 if (BUN_EXECUTABLE)
-    add_custom_target(StashTrackReactJuceUiBundle
+    add_custom_target(StashTrackUiBundle
         COMMAND "${BUN_EXECUTABLE}" install
         COMMAND "${BUN_EXECUTABLE}" run build
-        WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/jsui"
-        COMMENT "Building StashTrack React-JUCE UI bundle with Bun")
+        WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/jsui-vsreact"
+        COMMENT "Building the StashTrack VSReacT UI bundle with Bun")
 else()
-    message(STATUS "Bun was not found; run jsui builds manually after installing Bun.")
+    message(STATUS "Bun was not found; run jsui-vsreact builds manually after installing Bun.")
 endif()
 
 juce_add_console_app(StashTrackTests
@@ -146,7 +130,6 @@ if (WIN32)
     target_link_libraries(StashTrackTests PRIVATE Shell32 User32)
 endif()
 
-enable_testing()
 add_test(NAME StashTrackDownloadUtils COMMAND StashTrackTests)
 
 if (WIN32)

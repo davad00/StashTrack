@@ -384,12 +384,29 @@ At runtime, StashTrack launches the bundled yt-dlp.exe directly. uvx is kept as 
 }
 
 if (-not $SkipVstBuild) {
+    Write-Host "Building the VSReacT UI bundle..."
+    cmake --build $BuildDir --target StashTrackUiBundle --config $Configuration
+
+    if ($LASTEXITCODE -ne 0) {
+        throw "UI bundle build failed with exit code $LASTEXITCODE."
+    }
+
+    Write-Host "Configuring with the UI bundle embedded (STASHTRACK_VSREACT_DEV=OFF)..."
+    cmake -S $root -B $BuildDir -DSTASHTRACK_VSREACT_DEV=OFF
+
+    if ($LASTEXITCODE -ne 0) {
+        throw "CMake configure failed with exit code $LASTEXITCODE."
+    }
+
     Write-Host "Building StashTrack_VST3 ($Configuration)..."
     cmake --build $BuildDir --target StashTrack_VST3 --config $Configuration
 
     if ($LASTEXITCODE -ne 0) {
         throw "CMake build failed with exit code $LASTEXITCODE."
     }
+
+    Write-Host "Note: the build dir is now configured with STASHTRACK_VSREACT_DEV=OFF."
+    Write-Host "For hot-reload development, reconfigure with -DSTASHTRACK_VSREACT_DEV=ON."
 }
 
 if (-not (Test-Path -LiteralPath $pluginSource)) {
