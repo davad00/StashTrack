@@ -31,18 +31,6 @@ namespace
         return juce::String (label) + ": " + shortenPathForStatus (choice.folder);
     }
 
-    juce::String formatDuration (double seconds)
-    {
-        if (seconds <= 0.0)
-            return {};
-
-        const auto totalSeconds = juce::roundToInt (seconds);
-        const auto minutes = totalSeconds / 60;
-        const auto remainder = totalSeconds % 60;
-
-        return juce::String (minutes) + ":"
-             + juce::String (remainder).paddedLeft ('0', 2);
-    }
 }
 
 //==============================================================================
@@ -77,77 +65,48 @@ public:
 
     void paint (juce::Graphics& g) override
     {
+        // Chrome (filename, badges) is drawn by the React UI around this
+        // surface — this component is purely the wave + drag area.
         const auto bounds = getLocalBounds().toFloat();
+        constexpr float corner = 10.0f;
 
-        g.setColour (kPanelLift);
-        g.fillRect (bounds);
-        g.setColour (kLine);
-        g.drawRect (bounds.reduced (0.5f), 1.0f);
-
-        auto area = getLocalBounds().reduced (18, 14);
-        auto header = area.removeFromTop (28);
-        auto footer = area.removeFromBottom (24);
-        area.removeFromTop (8);
-        area.removeFromBottom (8);
-
-        g.setFont (juce::FontOptions { 15.0f, juce::Font::bold });
-        g.setColour (kText);
-        g.drawFittedText (audioFile.existsAsFile() ? audioFile.getFileName() : "No audio loaded",
-                          header.removeFromLeft (juce::jmax (80, header.getWidth() - 64)),
-                          juce::Justification::centredLeft,
-                          1);
-
-        if (thumbnail.getTotalLength() > 0.0)
-        {
-            g.setFont (juce::FontOptions { 12.0f });
-            g.setColour (kMuted);
-            g.drawFittedText (formatDuration (thumbnail.getTotalLength()),
-                              header,
-                              juce::Justification::centredRight,
-                              1);
-        }
-
-        const auto waveBounds = area.toFloat();
         g.setColour (kWell);
-        g.fillRect (waveBounds);
+        g.fillRoundedRectangle (bounds, corner);
+        g.setColour (kLine.withAlpha (0.9f));
+        g.drawRoundedRectangle (bounds.reduced (0.5f), corner, 1.0f);
 
-        g.setColour (kLine.withAlpha (0.7f));
-        for (int i = 1; i < 8; ++i)
+        const auto area = getLocalBounds().reduced (14, 12);
+        const auto waveBounds = area.toFloat();
+
+        g.setColour (kLine.withAlpha (0.45f));
+        for (int i = 1; i < 12; ++i)
         {
-            const auto x = waveBounds.getX() + waveBounds.getWidth() * static_cast<float> (i) / 8.0f;
-            g.drawVerticalLine (juce::roundToInt (x), waveBounds.getY() + 6.0f, waveBounds.getBottom() - 6.0f);
+            const auto x = waveBounds.getX() + waveBounds.getWidth() * static_cast<float> (i) / 12.0f;
+            g.drawVerticalLine (juce::roundToInt (x), waveBounds.getY() + 4.0f, waveBounds.getBottom() - 4.0f);
         }
 
-        g.setColour (kLine.brighter (0.2f));
+        g.setColour (kLine.brighter (0.15f));
         g.drawHorizontalLine (juce::roundToInt (waveBounds.getCentreY()),
-                              waveBounds.getX() + 8.0f,
-                              waveBounds.getRight() - 8.0f);
+                              waveBounds.getX() + 4.0f,
+                              waveBounds.getRight() - 4.0f);
 
         if (thumbnail.getTotalLength() > 0.0)
         {
+            // Soft glow pass under the wave, then the wave itself.
+            g.setColour (kAccent.withAlpha (0.22f));
+            thumbnail.drawChannels (g, area.reduced (4, 4), 0.0, thumbnail.getTotalLength(), 1.0f);
             g.setColour (kAccent);
-            thumbnail.drawChannels (g,
-                                    area.reduced (8, 10),
-                                    0.0,
-                                    thumbnail.getTotalLength(),
-                                    0.95f);
+            thumbnail.drawChannels (g, area.reduced (4, 8), 0.0, thumbnail.getTotalLength(), 0.92f);
         }
         else
         {
-            g.setFont (juce::FontOptions { 15.0f });
-            g.setColour (kMuted);
-            g.drawFittedText ("Waveform appears after download",
+            g.setFont (juce::FontOptions { 13.0f });
+            g.setColour (kMuted.withAlpha (0.8f));
+            g.drawFittedText ("waveform appears here after a download",
                               area,
                               juce::Justification::centred,
                               1);
         }
-
-        g.setFont (juce::FontOptions { 12.0f, juce::Font::bold });
-        g.setColour (audioFile.existsAsFile() ? kAccent : kMuted);
-        g.drawFittedText (audioFile.existsAsFile() ? "DRAG TO PLAYLIST" : "WAITING",
-                          footer,
-                          juce::Justification::centredLeft,
-                          1);
     }
 
     void mouseDrag (const juce::MouseEvent& event) override
@@ -247,7 +206,7 @@ YouTubeGrabberAudioProcessorEditor::YouTubeGrabberAudioProcessorEditor (
     reactRoot = std::make_unique<vsreact::RootView> (std::move (options), std::move (registry));
     addAndMakeVisible (*reactRoot);
 
-    setSize (720, 430);
+    setSize (720, 470);
     startUpdateCheck();
 }
 
@@ -383,6 +342,17 @@ void YouTubeGrabberAudioProcessorEditor::downloadFinished (StashTrack::DownloadJ
 {
     sendDownloadState (false);
 
+    const auto sendFinished = [this] (bool ok, const juce::String& fileName)
+    {
+        if (closing || reactRoot == nullptr)
+            return;
+
+        auto* payload = new juce::DynamicObject();
+        payload->setProperty ("ok", ok);
+        payload->setProperty ("fileName", fileName);
+        reactRoot->sendNativeEvent ("downloadFinished", juce::var (payload));
+    };
+
     if (result.succeeded)
     {
         currentDownloadChoice = pendingDownloadChoice;
@@ -391,11 +361,14 @@ void YouTubeGrabberAudioProcessorEditor::downloadFinished (StashTrack::DownloadJ
         if (auto* component = waveformComponent())
             component->setAudioFile (downloadedFile);
 
+        sendFinished (true, downloadedFile.getFileName());
         setStatus ((pendingDownloadOptions.section.enabled ? "Clip ready: " : "Ready: ")
                    + downloadedFile.getFileName(),
                    "accent");
         return;
     }
+
+    sendFinished (false, {});
 
     if (auto* component = waveformComponent())
         component->setAudioFile ({});

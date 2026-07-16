@@ -3,15 +3,17 @@ import App from "./App";
 
 configureTheme({
   colors: {
-    background: "#0A0B0A",
-    panel: "#101210",
-    panelLift: "#14170F",
-    well: "#0C0E0C",
-    line: "#2B3029",
+    background: "#060806",
+    panel: "#0D100C",
+    lift: "#12160F",
+    well: "#090B08",
+    line: "#242B20",
+    lineSoft: "#1A1F17",
     accent: "#C6F135",
-    text: "#E8EAE6",
-    muted: "#9AA097",
-    error: "#FF4F64",
+    text: "#EDF1E4",
+    muted: "#848D7B",
+    faint: "#5A6253",
+    error: "#FF5D6C",
   },
 });
 
