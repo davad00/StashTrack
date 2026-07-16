@@ -1,62 +1,56 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { gsap } from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import styles from './page.module.css'
+import {
+  Cursor,
+  Magnetic,
+  ScrollReadout,
+  WaveRiver,
+  useMotionReady,
+  useReveal,
+} from './components/experience'
 
 const SUPPORT_EMAIL = 'vsts@n9records.com'
 const DOWNLOAD_URL = '/download/windows'
 const DOWNLOAD_MACOS_URL = '/download/macos'
 const DOWNLOAD_LINUX_URL = '/download/linux'
 
-const bars = Array.from({ length: 84 }, (_, index) => {
-  const a = Math.sin(index * 0.47) * 0.5 + 0.5
-  const b = Math.sin(index * 0.19 + 1.7) * 0.5 + 0.5
-  return Math.max(18, Math.round((a * 0.66 + b * 0.34) * 100))
-})
-
-const steps = [
-  ['Paste', 'Drop a YouTube or yt-dlp supported URL into the plugin.'],
-  ['Clip', 'Mark the exact section before the download starts.'],
-  ['Render', 'StashTrack pulls a WAV through bundled yt-dlp, Deno, and ffmpeg.'],
-  ['Drag', 'Grab the waveform and drop it on an empty FL Studio playlist track.'],
-]
-
-const specs = [
-  ['Format', 'VST3 · Windows / macOS / Linux'],
-  ['Runtime', 'Bundled yt-dlp, Deno, ffmpeg'],
-  ['Output', 'Drag-ready WAV'],
-]
-
 type LatestReleaseResponse = {
   versionTag?: string
 }
 
-function Waveform({ compact = false }: { compact?: boolean }) {
-  return (
-    <div className={compact ? styles.waveCompact : styles.wave} aria-hidden="true">
-      {bars.map((height, index) => (
-        <span
-          key={index}
-          className={styles.waveBar}
-          style={{
-            height: `${compact ? Math.max(12, height * 0.6) : height}%`,
-            animationDelay: `${(index % 10) * 70}ms`,
-          }}
-        />
-      ))}
-    </div>
-  )
-}
+const sessionSteps: Array<[string, string, string]> = [
+  [
+    '01 / PASTE',
+    'Drop the link. Stay in the mixer.',
+    'Any YouTube or yt-dlp-supported URL goes straight into the plugin. The browser never gets your focus back.',
+  ],
+  [
+    '02 / CLIP',
+    'Take fifteen seconds, not fifteen minutes.',
+    'Mark start and end before the download begins. StashTrack prefers segment streams, so a 2-hour set gives up its best bar in seconds.',
+  ],
+  [
+    '03 / RENDER',
+    'Watch it arrive.',
+    'yt-dlp pulls, ffmpeg renders a clean WAV, and the progress bar under the URL is real — parsed live from the stream.',
+  ],
+]
 
 export default function Home() {
-  const [dropped, setDropped] = useState(false)
+  const ready = useMotionReady()
+  useReveal(ready)
+
   const [versionTag, setVersionTag] = useState('latest')
-  const year = useMemo(() => new Date().getFullYear(), [])
   const versionLabel = versionTag || 'latest'
-  const displayedSpecs = useMemo(
-    () => [...specs, ['Version', versionLabel]],
-    [versionLabel],
-  )
+
+  const heroRef = useRef<HTMLElement>(null)
+  const dragSceneRef = useRef<HTMLElement>(null)
+  const chipRef = useRef<HTMLDivElement>(null)
+  const trackRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     let cancelled = false
@@ -75,224 +69,291 @@ export default function Home() {
     }
   }, [])
 
+  // Hero entrance: title lines rise, plugin window drifts in.
+  useEffect(() => {
+    if (!ready || !heroRef.current) return
+
+    const lines = heroRef.current.querySelectorAll(`.${styles.titleLine}`)
+    const window_ = heroRef.current.querySelector(`.${styles.pluginWindow}`)
+
+    const tl = gsap.timeline()
+    tl.from(lines, {
+      y: 140,
+      opacity: 0,
+      duration: 1.3,
+      stagger: 0.09,
+      ease: 'power4.out',
+    })
+
+    if (window_) {
+      tl.from(
+        window_,
+        { y: 80, opacity: 0, rotate: 1.5, duration: 1.4, ease: 'power4.out' },
+        '-=0.9',
+      )
+    }
+
+    return () => {
+      tl.kill()
+    }
+  }, [ready])
+
+  // Signature scene: the rendered clip drags itself from the plugin into the
+  // playlist as you scroll through the pinned scene.
+  useEffect(() => {
+    if (!ready || !dragSceneRef.current || !chipRef.current || !trackRef.current) return
+    if (window.matchMedia('(max-width: 767px)').matches) return
+
+    const chip = chipRef.current
+    const track = trackRef.current
+
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: dragSceneRef.current,
+        start: 'top top',
+        end: '+=140%',
+        pin: true,
+        scrub: 1,
+      },
+    })
+
+    tl.to(chip, { y: 250, x: 40, rotate: 3, ease: 'none' }, 0)
+      .to(chip, { boxShadow: '0 30px 80px rgba(198, 241, 53, 0.28)', ease: 'none' }, 0)
+      .fromTo(
+        track,
+        { outlineColor: 'rgba(198, 241, 53, 0)' },
+        { outlineColor: 'rgba(198, 241, 53, 0.8)', ease: 'none' },
+        0.4,
+      )
+      .to(chip, { scale: 0.96, ease: 'none' }, 0.8)
+
+    return () => {
+      tl.scrollTrigger?.kill()
+      tl.kill()
+    }
+  }, [ready])
+
   return (
-    <main className={styles.page}>
-      <a className={styles.skipLink} href="#content">
+    <main className={styles.page} id="top">
+      <a className={styles.skipLink} href="#session">
         Skip to content
       </a>
 
-      <header className={styles.nav}>
+      <Cursor />
+      <WaveRiver />
+
+      <header className={styles.nav} aria-label="Primary">
         <a href="#top" className={styles.brand} aria-label="StashTrack home">
-          <span className={styles.mark} aria-hidden="true" />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logos/logo-no-text.jpeg" alt="" width={30} height={30} />
           <span>StashTrack</span>
-          <span className={styles.version}>{versionLabel}</span>
+          <span className={styles.versionPill}>
+            <i aria-hidden="true" />
+            {versionLabel}
+          </span>
         </a>
-        <nav className={styles.navLinks} aria-label="Primary navigation">
-          <a href="#workflow">Workflow</a>
-          <a href="#clip">Clip</a>
-          <a href="#install">Install</a>
+        <nav className={styles.navLinks}>
+          <a href="#session">Session</a>
+          <a href="#platforms">Downloads</a>
           <a href={`mailto:${SUPPORT_EMAIL}`}>Support</a>
         </nav>
-        <a className={styles.navButton} href={DOWNLOAD_URL}>
-          Get installer
-        </a>
+        <span className={styles.readout} aria-hidden="true">
+          <ScrollReadout />
+        </span>
       </header>
 
-      <section id="top" className={styles.hero}>
-        <div className={styles.heroCopy}>
-          <p className={styles.kicker}>N9 Records - for FL Studio beatmakers</p>
-          <h1 className={styles.title}>Sample from the web without leaving the mixer.</h1>
+      <section ref={heroRef} className={styles.hero}>
+        <h1 className={styles.title}>
+          <span className={styles.titleLine}>SAMPLE</span>
+          <span className={styles.titleLine}>
+            THE <em>WEB</em>
+          </span>
+          <span className={styles.titleLine}>IN YOUR DAW.</span>
+        </h1>
+
+        <div className={styles.heroSide}>
           <p className={styles.lede}>
-            StashTrack is a JUCE VST3 that downloads the section you want,
-            renders a waveform inside the plugin, and turns it into a native
-            file drag for your FL Studio playlist.
+            StashTrack is a VST3 that downloads the section you want, renders
+            the waveform inside the plugin, and hands it to your playlist as a
+            native file drag.
           </p>
           <div className={styles.actions}>
-            <a className={styles.primaryButton} href={DOWNLOAD_URL}>
-              Download for Windows {versionLabel}
+            <Magnetic>
+              <a className={styles.primaryButton} href={DOWNLOAD_URL} data-hover>
+                WINDOWS · {versionLabel}
+              </a>
+            </Magnetic>
+            <a className={styles.ghostButton} href={DOWNLOAD_MACOS_URL} data-hover>
+              MACOS
             </a>
-            <a className={styles.secondaryButton} href="#workflow">
-              See the workflow
+            <a className={styles.ghostButton} href={DOWNLOAD_LINUX_URL} data-hover>
+              LINUX
             </a>
           </div>
-          <p className={styles.note}>
-            Also available for <a href={DOWNLOAD_MACOS_URL}>macOS (.pkg)</a> and{' '}
-            <a href={DOWNLOAD_LINUX_URL}>Linux (.tar.gz)</a>.
-          </p>
-          <p className={styles.note}>
+          <p className={styles.legal}>
             Only download content you own, have licensed, or have rights to use.
           </p>
         </div>
 
-        <aside className={styles.pluginFrame} aria-label="StashTrack plugin interface preview">
-          <div className={styles.windowBar}>
-            <span className={styles.windowDot} />
-            <span className={styles.windowDot} />
-            <span className={styles.windowDot} />
-            <span className={styles.windowTitle}>StashTrack.vst3</span>
+        <div className={styles.pluginWindow} aria-label="StashTrack plugin preview">
+          <div className={styles.pluginBar}>
+            <span />
+            <span />
+            <span className={styles.pluginTitle}>StashTrack.vst3</span>
           </div>
           <div className={styles.pluginBody}>
-            <div className={styles.pluginTop}>
-              <span className={styles.pluginName}>StashTrack</span>
-              <span className={styles.pluginStatus}>READY</span>
+            <span className={styles.microLabel}>SOURCE URL</span>
+            <div className={styles.urlRow}>
+              <span className={styles.urlText}>youtube.com/watch?v=hsGOT_0L16U</span>
+              <span className={styles.urlButton}>DOWNLOAD</span>
             </div>
-            <label className={styles.mockLabel}>SOURCE URL</label>
-            <div className={styles.urlMock}>
-              <span>https://www.youtube.com/watch?v=hsGOT_0L16U</span>
-              <button type="button">Download</button>
+            <div className={styles.pluginWave} aria-hidden="true">
+              {Array.from({ length: 36 }, (_, i) => (
+                <i
+                  key={i}
+                  style={{
+                    height: `${18 + Math.round((Math.sin(i * 0.55) * 0.5 + 0.5) * 64)}%`,
+                    animationDelay: `${(i % 9) * 90}ms`,
+                  }}
+                />
+              ))}
             </div>
-            <div className={styles.clipRow}>
-              <span className={styles.check}>Clip</span>
-              <span>Start 1:23:45</span>
-              <span>End 1:24:00</span>
-            </div>
-            <div className={styles.wavePanel}>
-              <div className={styles.waveHeader}>
-                <span>15.01 second WAV</span>
-                <span>drag source armed</span>
-              </div>
-              <Waveform />
+            <div className={styles.pluginFooter}>
+              <span className={styles.microLabel}>READY</span>
+              <span className={styles.microAccent}>DRAG TO PLAYLIST</span>
             </div>
           </div>
-        </aside>
+        </div>
       </section>
 
-      <section id="content" className={styles.stats} aria-label="Product facts">
-        {displayedSpecs.map(([label, value]) => (
-          <div className={styles.stat} key={label}>
-            <span>{label}</span>
-            <strong>{value}</strong>
-          </div>
+      <section id="session" className={styles.session}>
+        {sessionSteps.map(([step, headline, body]) => (
+          <article className={styles.scene} key={step} data-reveal>
+            <span className={styles.microLabel}>{step}</span>
+            <h2 className={styles.sceneTitle}>{headline}</h2>
+            <p className={styles.sceneBody}>{body}</p>
+          </article>
         ))}
       </section>
 
-      <section id="workflow" className={styles.workflow}>
-        <div className={styles.sectionIntro}>
-          <p className={styles.kicker}>Workflow</p>
-          <h2>From URL to playlist track in one focused motion.</h2>
-        </div>
-        <ol className={styles.steps}>
-          {steps.map(([title, body], index) => (
-            <li key={title} className={styles.step}>
-              <span className={styles.stepIndex}>{String(index + 1).padStart(2, '0')}</span>
-              <h3>{title}</h3>
-              <p>{body}</p>
-            </li>
-          ))}
-        </ol>
-      </section>
-
-      <section id="clip" className={styles.split}>
-        <div className={styles.sectionIntro}>
-          <p className={styles.kicker}>Clip first</p>
-          <h2>Long videos stop being a problem.</h2>
-          <p>
-            Modern YouTube extraction can expose huge DASH files. StashTrack
-            prefers segment streams for clipped downloads, uses Deno for current
-            YouTube JavaScript solving, and falls back cleanly when a source
-            cannot provide a seek-friendly stream.
+      <section ref={dragSceneRef} className={styles.dragScene} aria-label="Drag demo">
+        <div className={styles.dragInner}>
+          <span className={styles.microLabel}>04 / DRAG</span>
+          <h2 className={styles.sceneTitle}>The waveform is the file.</h2>
+          <p className={styles.sceneBody}>
+            Scroll — the clip leaves the plugin and lands on the playlist,
+            exactly like it does in your session. Same OS drag Explorer would
+            send. No export dialog, ever.
           </p>
-        </div>
-        <div className={styles.clipVisual}>
-          <Waveform />
-          <div className={styles.clipWindow}>
-            <span>1:23:45</span>
-            <span>1:24:00</span>
+
+          <div className={styles.dragStage}>
+            <div ref={chipRef} className={styles.waveChip}>
+              <span className={styles.microLabel}>clip.wav · 0:15</span>
+              <div className={styles.chipWave} aria-hidden="true">
+                {Array.from({ length: 22 }, (_, i) => (
+                  <i
+                    key={i}
+                    style={{ height: `${24 + Math.round((Math.sin(i * 0.7) * 0.5 + 0.5) * 56)}%` }}
+                  />
+                ))}
+              </div>
+            </div>
+            <div ref={trackRef} className={styles.playlistTrack}>
+              <span className={styles.microLabel}>PLAYLIST · TRACK 7</span>
+            </div>
           </div>
         </div>
       </section>
 
-      <section id="drag" className={styles.dragLab}>
-        <div className={styles.sectionIntro}>
-          <p className={styles.kicker}>Drag source</p>
-          <h2>The waveform is the file handle.</h2>
-          <p>
-            FL Studio receives the same kind of file drop it would get from
-            Explorer, but the selection, download, and preview all happen inside
-            the plugin window.
-          </p>
+      <section id="platforms" className={styles.platforms}>
+        <h2 className={styles.sectionStatement} data-reveal>
+          One plugin.
+          <br />
+          Every studio.
+        </h2>
+
+        <div className={styles.platformGrid}>
+          <article className={styles.platformCard} data-reveal>
+            <span className={styles.microLabel}>WINDOWS · VST3</span>
+            <h3>Full installer, batteries included.</h3>
+            <p>
+              Bundles yt-dlp, ffmpeg, Deno, uv, and the VC++ runtime. A fresh
+              PC needs nothing else — run the setup, rescan, sample.
+            </p>
+            <Magnetic>
+              <a className={styles.primaryButton} href={DOWNLOAD_URL} data-hover>
+                DOWNLOAD {versionLabel}
+              </a>
+            </Magnetic>
+          </article>
+
+          <article className={styles.platformCard} data-reveal>
+            <span className={styles.microLabel}>MACOS · VST3 PKG</span>
+            <h3>Unsigned, on purpose (for now).</h3>
+            <p>
+              Installs to /Library/Audio/Plug-Ins/VST3. No Apple Developer ID
+              yet, so on first install: right-click the .pkg → Open, or allow
+              it in Privacy &amp; Security. Tools via{' '}
+              <code>brew install yt-dlp ffmpeg</code>.
+            </p>
+            <a className={styles.ghostButton} href={DOWNLOAD_MACOS_URL} data-hover>
+              DOWNLOAD .PKG
+            </a>
+          </article>
+
+          <article className={styles.platformCard} data-reveal>
+            <span className={styles.microLabel}>LINUX · VST3 TAR.GZ</span>
+            <h3>Untar, install.sh, done.</h3>
+            <p>
+              Ships the VST3 with an installer targeting ~/.vst3. Bring{' '}
+              <code>ffmpeg</code> and <code>yt-dlp</code> from your package
+              manager and they are found on PATH.
+            </p>
+            <a className={styles.ghostButton} href={DOWNLOAD_LINUX_URL} data-hover>
+              DOWNLOAD .TAR.GZ
+            </a>
+          </article>
         </div>
-        <div className={styles.dragDemo}>
-          <div className={styles.dragSource}>
-            <span>clip.wav</span>
-            <Waveform compact />
-            <button type="button" onClick={() => setDropped((value) => !value)}>
-              {dropped ? 'Reset track' : 'Drop on track'}
-            </button>
-          </div>
-          <div className={styles.track} data-filled={dropped ? 'true' : 'false'}>
-            {dropped ? <Waveform compact /> : <span>EMPTY PLAYLIST TRACK</span>}
-          </div>
+
+        <p className={styles.updateNote} data-reveal>
+          <span className={styles.microAccent}>AUTO-UPDATES</span> — StashTrack
+          checks GitHub when the plugin opens. Windows installs the new version
+          in place; macOS and Linux are pointed at the right download for their
+          platform.
+        </p>
+      </section>
+
+      <section className={styles.finalCta}>
+        <h2 className={styles.ctaTitle} data-reveal>
+          KEEP THE BROWSER
+          <br />
+          OUT OF THE BEAT.
+        </h2>
+        <div className={styles.actions} data-reveal>
+          <Magnetic>
+            <a className={styles.primaryButton} href={DOWNLOAD_URL} data-hover>
+              WINDOWS · {versionLabel}
+            </a>
+          </Magnetic>
+          <a className={styles.ghostButton} href={DOWNLOAD_MACOS_URL} data-hover>
+            MACOS
+          </a>
+          <a className={styles.ghostButton} href={DOWNLOAD_LINUX_URL} data-hover>
+            LINUX
+          </a>
         </div>
       </section>
 
-      <section id="install" className={styles.install}>
-        <div className={styles.sectionIntro}>
-          <p className={styles.kicker}>Fresh PC install</p>
-          <h2>The installer brings the toolchain with it.</h2>
-          <p>
-            The Windows setup checks before installing, then places the VST3 and
-            helper tools beside the plugin binary. No global Python setup, no
-            manual ffmpeg hunt, no guessing which yt-dlp version uvx resolved.
-          </p>
-        </div>
-        <ul className={styles.installList}>
-          <li>StashTrack.vst3</li>
-          <li>yt-dlp.exe for extraction</li>
-          <li>uv.exe and uvx.exe</li>
-          <li>deno.exe for YouTube JS solving</li>
-          <li>ffmpeg.exe for decode and trim</li>
-          <li>VC++ runtime when missing</li>
-        </ul>
-        <div className={styles.sectionIntro}>
-          <h3>Auto-updates</h3>
-          <p>
-            StashTrack checks GitHub when the plugin opens and offers the newest
-            version. On Windows it downloads and runs the installer for you; on
-            macOS and Linux it opens the downloads page for your platform.
-          </p>
-          <h3>macOS and Linux notes</h3>
-          <p>
-            The macOS .pkg installs the VST3 to /Library/Audio/Plug-Ins/VST3.
-            It is currently <strong>unsigned</strong> (no Apple Developer ID
-            yet), so on first install right-click the .pkg and choose Open, or
-            allow it under System Settings → Privacy &amp; Security. Install
-            the runtime tools with <code>brew install yt-dlp ffmpeg</code>.
-          </p>
-          <p>
-            The Linux tarball ships the VST3 with an install script targeting
-            ~/.vst3 — install <code>ffmpeg</code> and <code>yt-dlp</code> from
-            your package manager so they are on PATH.
-          </p>
-        </div>
-      </section>
-
-      <section id="download" className={styles.finalCta}>
-        <p className={styles.kicker}>stashtrack.n9records.com</p>
-        <h2>Keep the browser out of the beat.</h2>
-        <div className={styles.actions}>
-          <a className={styles.primaryButton} href={DOWNLOAD_URL}>
-            Windows {versionLabel}
-          </a>
-          <a className={styles.secondaryButton} href={DOWNLOAD_MACOS_URL}>
-            macOS .pkg
-          </a>
-          <a className={styles.secondaryButton} href={DOWNLOAD_LINUX_URL}>
-            Linux .tar.gz
-          </a>
+      <footer className={styles.footer}>
+        <div className={styles.footerBrand}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logos/logo-no-text.jpeg" alt="" width={24} height={24} />
+          <span>StashTrack — N9 Records</span>
         </div>
         <p>
           Support: <a href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a>
         </p>
-      </section>
-
-      <footer className={styles.footer}>
-        <div className={styles.brand}>
-          <span className={styles.mark} aria-hidden="true" />
-          <span>StashTrack</span>
-        </div>
-        <p>Copyright (c) {year} N9 Records.</p>
-        <p>Only download content you have the rights to use.</p>
+        <p>Rendered natively by VSReacT. Only sample what you have rights to.</p>
       </footer>
     </main>
   )

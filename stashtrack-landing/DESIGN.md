@@ -1,113 +1,132 @@
 ---
-name: stashtrack
-type: website
-brand:
-  name: StashTrack
-  tagline: "URL-to-playlist sampling for FL Studio beatmakers"
-  personality: [focused, nocturnal, technical, tactile]
-  voice: [direct, specific, studio-native]
+version: alpha
+name: StashTrack Breakthrough
+description: Cinematic dark-room identity for the StashTrack landing experience
 colors:
-  palette:
-    primary: "#0A0B0A"
-    secondary: "#E8EAE6"
-    accent: "#C6F135"
-    background: "#0A0B0A"
-    surface: "#101210"
-    text-primary: "#E8EAE6"
-    text-secondary: "#9AA097"
-    border: "#2B3029"
-    error: "#FF4F64"
-    success: "#C6F135"
-  semantics:
-    - label: "Primary action"
-      token: "--accent"
-    - label: "Main background"
-      token: "--bg"
-    - label: "Panel surface"
-      token: "--panel"
-    - label: "Muted text"
-      token: "--muted"
+  primary: "#070907"
+  secondary: "#10140E"
+  tertiary: "#C6F135"
+  neutral: "#EDF1E4"
+  muted: "#79826E"
 typography:
-  font-family:
-    primary: "Geist, system-ui, sans-serif"
-    secondary: "Geist, system-ui, sans-serif"
-    mono: "Geist Mono, ui-monospace, monospace"
-  scale:
-    display: { size: "5rem", weight: 800, line-height: 1 }
-    h1: { size: "3.5rem", weight: 800, line-height: 1 }
-    h2: { size: "2.35rem", weight: 800, line-height: 1 }
-    h3: { size: "1.2rem", weight: 700, line-height: 1.2 }
-    body: { size: "1rem", weight: 400, line-height: 1.7 }
-    caption: { size: "0.78rem", weight: 400, line-height: 1.5 }
+  display-huge:
+    fontFamily: Space Grotesk
+    fontSize: 11vw
+    fontWeight: 700
+    lineHeight: 0.88
+    letterSpacing: -0.04em
+  display-section:
+    fontFamily: Space Grotesk
+    fontSize: 4.5vw
+    fontWeight: 700
+    lineHeight: 0.95
+    letterSpacing: -0.03em
+  body:
+    fontFamily: Space Grotesk
+    fontSize: 17px
+    fontWeight: 400
+    lineHeight: 1.55
+    letterSpacing: 0em
+  label-micro:
+    fontFamily: JetBrains Mono
+    fontSize: 11px
+    fontWeight: 500
+    lineHeight: 1
+    letterSpacing: 0.14em
+rounded:
+  none: 0px
+  soft: 10px
+  full: 999px
 spacing:
-  scale:
-    xs: "0.25rem"
-    sm: "0.5rem"
-    md: "1rem"
-    lg: "1.5rem"
-    xl: "2rem"
-    2xl: "3rem"
-    3xl: "4.25rem"
-motion:
-  easing:
-    default: "cubic-bezier(0.2, 0, 0, 1)"
-    enter: "cubic-bezier(0.16, 1, 0.3, 1)"
-    exit: "cubic-bezier(0.4, 0, 1, 1)"
-    bounce: "cubic-bezier(0.2, 0, 0, 1)"
-  duration:
-    fast: "180ms"
-    normal: "260ms"
-    slow: "420ms"
-  principles:
-    - Motion should feel like a piece of studio hardware waking up.
-    - Animate opacity and transforms only.
-    - Disable waveform animation for reduced motion.
-border-radius:
-  scale:
-    none: "0"
-    sm: "0.125rem"
-    md: "0.25rem"
-    lg: "0.5rem"
-    full: "9999px"
-shadows:
-  scale:
-    none: "none"
-    sm: "0 8px 20px rgba(0, 0, 0, 0.2)"
-    md: "0 24px 60px rgba(0, 0, 0, 0.36)"
-    lg: "0 30px 80px rgba(0, 0, 0, 0.42)"
-    xl: "0 40px 100px rgba(0, 0, 0, 0.5)"
-z-index:
-  scale:
-    base: 0
-    dropdown: 100
-    sticky: 200
-    modal: 300
-    toast: 400
+  section: 22vh
+  gutter: 5vw
+components:
+  button-primary:
+    backgroundColor: "{colors.tertiary}"
+    textColor: "{colors.primary}"
+    rounded: "{rounded.full}"
+    padding: 18px
+    typography: "{typography.label-micro}"
+  button-ghost:
+    backgroundColor: "{colors.primary}"
+    textColor: "{colors.neutral}"
+    rounded: "{rounded.full}"
+    padding: 18px
+    typography: "{typography.label-micro}"
+  card:
+    backgroundColor: "{colors.secondary}"
+    textColor: "{colors.neutral}"
+    rounded: "{rounded.soft}"
+    padding: 28px
 ---
 
-# Design Language
-
 ## Overview
-StashTrack uses a nocturnal studio-terminal identity: off-black surfaces, thin grid lines, lime signal accents, mono labels, and tactile rectangular controls. The audience is FL Studio beatmakers who want a fast sample-grabbing tool that feels like part of the DAW, not a marketing wrapper.
+
+StashTrack lives where beatmakers live: a dark studio at 2AM, one lime-green
+waveform glowing on a black console. The site is that room. Near-black canvas,
+one radioactive accent, type set like hardware silkscreen. The scroll is a
+session: paste, clip, render, drag — the story of one sample travelling from
+the web into a playlist track.
+
+Motion tokens: `ease-cinematic: cubic-bezier(0.16, 1, 0.3, 1)` for reveals,
+scrub-bound timelines for the narrative scenes. Durations: micro 0.25s,
+standard 0.7s, cinematic 1.4s+.
+
+## Colors
+
+`primary #070907` is the room. `secondary #10140E` is the console face —
+panels barely lighter than the void. `tertiary #C6F135` is the ONLY light
+source: waveform, cursor ring, buttons, live version pill. `neutral #EDF1E4`
+for headlines and body, `muted #79826E` for silkscreen labels. Never more
+than one lime element competing per viewport. Contrast: lime-on-primary
+12.4:1, neutral-on-primary 17.1:1, muted-on-primary 5.0:1 — all AA+.
+
+## Typography
+
+Space Grotesk carries the architecture: the hero wordmark at 11vw, section
+statements at 4.5vw. JetBrains Mono carries the machine voice: 11px uppercase
+tracked labels for everything operational (versions, platform names, steps).
+No middle sizes — a line is either a monument or a serial number. Kinetic
+behavior: headlines rise from `y:120, opacity:0` with `power4.out`, split by
+line; micro-labels appear instantly (they're instrumentation, not drama).
+
+## Layout
+
+No grid. A single fluid column with elements pushed off-axis: hero type bleeds
+toward the left edge, the plugin window floats right, scene captions sit at
+5vw gutters. Sections breathe with 22vh spacing. Lenis smooth scroll; a
+full-height waveform canvas runs behind everything — the page floats over it.
+
+## Elevation & Depth
+
+Z-layers: `wave-canvas (0)` — the full-height waveform river; `content (10)`;
+`plugin-window (12)` with a soft 60px lime-tinted shadow; `nav (20)`;
+`cursor (100)`. Parallax: captions drift at 0.9, the canvas river moves at
+0.35 of scroll speed — the sample feels submerged under the page.
+
+## Shapes
+
+Rectangles with 10px radii for consoles (matching the plugin's own cards);
+pills for anything clickable; raw right angles for the canvas river. The only
+organic shape on the page is the waveform itself.
+
+## Components
+
+- `button-primary`: lime pill, black mono label, magnetic (24px radius),
+  scales 1.04 on hover with `back.out(1.7)`.
+- `button-ghost`: 1px `#2A3324` border pill, neutral label; border ignites to
+  lime on hover.
+- `nav`: fixed top strip, logo left, mono links right, backdrop-blurred —
+  links are silkscreen, discoverable instantly.
+- `cursor`: 12px lime dot + 36px trailing ring, `mix-blend-mode: difference`;
+  ring swells to 64px over interactive elements; hidden on touch devices.
+- `version-pill`: mono, live from /api/latest-release, pulsing lime dot.
 
 ## Do's and Don'ts
-### Do's
-- Use lime only for actions, status, waveform energy, and active clip boundaries.
-- Keep panels squared, dense, and hardware-like.
-- Use mono text for timecodes, file states, URLs, and workflow labels.
-- Let the waveform be the visual hero.
 
-### Don'ts
-- Do not use purple, blue gradients, rounded SaaS cards, or lifestyle imagery.
-- Do not center every section; keep layouts left-biased and workbench-like.
-- Do not add decorative icons when text and waveform geometry carry the product.
-- Do not animate layout dimensions.
-
-## Signature Moment
-The signature interaction is the waveform as a file handle: on the landing page it animates and drops into a track mock, while in the VST it becomes a native OS drag source into the FL Studio playlist. Reduced-motion users receive a static waveform.
-
-## Accessibility
-- Text contrast must meet WCAG AA.
-- Controls must keep visible focus states.
-- Touch targets must be at least 44px high.
-- Motion respects `prefers-reduced-motion`.
+- DO drive the waveform river from scroll — it is the narrative spine.
+- DO respect prefers-reduced-motion: static frames, no scrub scenes.
+- DON'T introduce a second accent color, ever.
+- DON'T hardcode versioned installer URLs (release resolution is dynamic).
+- DON'T use the browser cursor on desktop; DON'T hijack touch devices.
+- DON'T let any text fall below AA contrast on the near-black base.

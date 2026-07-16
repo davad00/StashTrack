@@ -1,15 +1,15 @@
 import type { Metadata, Viewport } from 'next'
-import { Geist, Geist_Mono } from 'next/font/google'
+import { Space_Grotesk, JetBrains_Mono } from 'next/font/google'
 import './globals.css'
 
-const geistSans = Geist({
-  variable: '--font-geist-sans',
+const grotesk = Space_Grotesk({
+  variable: '--font-grotesk',
   subsets: ['latin'],
   display: 'swap',
 })
 
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
+const mono = JetBrains_Mono({
+  variable: '--font-mono',
   subsets: ['latin'],
   display: 'swap',
 })
@@ -18,25 +18,25 @@ const siteUrl = 'https://stashtrack.n9records.com'
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
-  title: 'StashTrack - Sample from the web inside FL Studio',
+  title: 'StashTrack — Sample the web from inside your DAW',
   description:
-    'StashTrack is a JUCE VST3 by N9 Records. Paste a URL, clip the range, download with yt-dlp and ffmpeg, then drag the waveform into FL Studio.',
+    'StashTrack is a VST3 by N9 Records for Windows, macOS, and Linux. Paste a URL, clip the range, watch it render, drag the waveform straight into your FL Studio playlist.',
   alternates: {
     canonical: '/',
   },
   openGraph: {
     title: 'StashTrack',
     description:
-      'A VST3 sample grabber for FL Studio beatmakers who want fast URL-to-playlist workflow.',
+      'URL to playlist track in one motion. A VST3 sample grabber for beatmakers — Windows, macOS, and Linux.',
     url: siteUrl,
     siteName: 'StashTrack',
     type: 'website',
     images: [
       {
-        url: '/og.svg',
-        width: 1200,
-        height: 630,
-        alt: 'StashTrack plugin waveform preview',
+        url: '/logos/logo-text.jpeg',
+        width: 1024,
+        height: 1024,
+        alt: 'StashTrack — a crate of samples with a glowing waveform',
       },
     ],
   },
@@ -48,7 +48,7 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   colorScheme: 'dark',
-  themeColor: '#0a0b0a',
+  themeColor: '#070907',
 }
 
 export default function RootLayout({
@@ -57,7 +57,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
+    <html lang="en" className={`${grotesk.variable} ${mono.variable}`}>
       <body>{children}</body>
     </html>
   )

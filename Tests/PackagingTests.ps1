@@ -36,7 +36,7 @@ Assert-Contains $cmake 'BUNDLE_ID                 "com.n9records.stashtrack"' 'J
 Assert-Contains $cmake 'DESCRIPTION               "Download, clip, preview, and drag audio from yt-dlp-supported URLs into your DAW."' 'JUCE description must explain StashTrack.'
 Assert-Contains $cmake 'PLUGIN_MANUFACTURER_CODE  Ycmp' 'JUCE manufacturer code must remain stable so FL Studio can reopen existing StashTrack entries.'
 Assert-Contains $cmake 'PRODUCT_NAME              "StashTrack"' 'JUCE product name must be StashTrack.'
-Assert-Contains $readme '# StashTrack JUCE Plug-in' 'README title must use StashTrack.'
+Assert-Contains $readme '<h1 align="center">StashTrack JUCE Plug-in</h1>' 'README title must use StashTrack.'
 Assert-Contains $readme 'Publisher: N9 Records' 'README must document the publisher.'
 Assert-Contains $readme 'Website: https://stashtrack.n9records.com' 'README must document the website.'
 Assert-Contains $readme 'Support: vsts@n9records.com' 'README must document the support email.'
