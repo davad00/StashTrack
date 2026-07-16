@@ -49,6 +49,7 @@ stashtrack-landing/public/downloads/*.exe
 
 # Generated JS UI bundle
 jsui/build/
+jsui-vsreact/build/
 
 # Logs and temporary archives
 *.log

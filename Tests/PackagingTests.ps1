@@ -26,7 +26,7 @@ function Assert-Contains {
     }
 }
 
-Assert-Contains $cmake 'project(StashTrack VERSION 0.6.0)' 'CMake project must be named StashTrack with version 0.6.0.'
+Assert-Contains $cmake 'project(StashTrack VERSION 0.7.0)' 'CMake project must be named StashTrack with version 0.7.0.'
 Assert-Contains $cmake 'juce_add_plugin(StashTrack' 'JUCE plug-in target must be named StashTrack.'
 Assert-Contains $cmake 'COMPANY_NAME              "N9 Records"' 'JUCE company name must be N9 Records.'
 Assert-Contains $cmake 'COMPANY_WEBSITE           "https://stashtrack.n9records.com"' 'JUCE company website must be stashtrack.n9records.com.'
@@ -40,7 +40,7 @@ Assert-Contains $readme '# StashTrack JUCE Plug-in' 'README title must use Stash
 Assert-Contains $readme 'Publisher: N9 Records' 'README must document the publisher.'
 Assert-Contains $readme 'Website: https://stashtrack.n9records.com' 'README must document the website.'
 Assert-Contains $readme 'Support: vsts@n9records.com' 'README must document the support email.'
-Assert-Contains $readme 'Version: v0.6' 'README must document the preferred display version.'
+Assert-Contains $readme 'Version: v0.7' 'README must document the preferred display version.'
 Assert-Contains $readme 'License: StashTrack Non-Commercial License v0.1' 'README must document the custom non-commercial license.'
 Assert-Contains $license '# StashTrack Non-Commercial License v0.1' 'License file must use the custom StashTrack license title.'
 Assert-Contains $license 'No Commercial Use Or Profit' 'License file must prohibit commercial use and profit.'
@@ -146,8 +146,8 @@ $innoScript = Get-Content -Raw $windowsExeInstallerScript
 
 foreach ($required in @(
     'AppName=StashTrack',
-    '#define AppVersion "v0.6"',
-    '#define AppVersionNumeric "0.6.0"',
+    '#define AppVersion "v0.7"',
+    '#define AppVersionNumeric "0.7.0"',
     '#define AppPublisher "N9 Records"',
     '#define AppURL "https://stashtrack.n9records.com"',
     '#define AppSupportEmail "vsts@n9records.com"',
@@ -185,7 +185,7 @@ foreach ($required in @(
     'innosetup-6.7.3.exe',
     'vc_redist.x64.exe',
     '$vcRedistCache = Join-Path $cache "vc_redist.x64.exe"',
-    'StashTrackv0.6Setup.exe',
+    'StashTrackv0.7Setup.exe',
     'ISCC.exe'
 )) {
     Assert-Contains $builderScript $required "Windows EXE installer build script is missing required text: $required"

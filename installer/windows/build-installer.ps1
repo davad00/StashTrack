@@ -32,7 +32,7 @@ $dist = Join-Path $root "dist"
 
 $pluginSource = Join-Path $BuildDir "StashTrack_artefacts\$Configuration\VST3\StashTrack.vst3"
 $pluginDestination = Join-Path $payload "StashTrack.vst3"
-$setupOutput = Join-Path $dist "StashTrackv0.6Setup.exe"
+$setupOutput = Join-Path $dist "StashTrackv0.7Setup.exe"
 
 function Get-FullPath {
     param([string] $Path)
@@ -339,7 +339,7 @@ function Write-StagingDocuments {
     @"
 StashTrack VST3 Plug-in
 Publisher: N9 Records
-Version: v0.6
+Version: v0.7
 Website: https://stashtrack.n9records.com
 Support: vsts@n9records.com
 
@@ -384,12 +384,33 @@ At runtime, StashTrack launches the bundled yt-dlp.exe directly. uvx is kept as 
 }
 
 if (-not $SkipVstBuild) {
+    Write-Host "Building the VSReacT UI bundle..."
+    Push-Location (Join-Path $root "jsui-vsreact")
+    try {
+        & bun install
+        if ($LASTEXITCODE -ne 0) { throw "bun install failed with exit code $LASTEXITCODE." }
+        & bun run build
+        if ($LASTEXITCODE -ne 0) { throw "bun run build failed with exit code $LASTEXITCODE." }
+    } finally {
+        Pop-Location
+    }
+
+    Write-Host "Configuring with the UI bundle embedded (STASHTRACK_VSREACT_DEV=OFF)..."
+    cmake -S $root -B $BuildDir -DSTASHTRACK_VSREACT_DEV=OFF
+
+    if ($LASTEXITCODE -ne 0) {
+        throw "CMake configure failed with exit code $LASTEXITCODE."
+    }
+
     Write-Host "Building StashTrack_VST3 ($Configuration)..."
     cmake --build $BuildDir --target StashTrack_VST3 --config $Configuration
 
     if ($LASTEXITCODE -ne 0) {
         throw "CMake build failed with exit code $LASTEXITCODE."
     }
+
+    Write-Host "Note: the build dir is now configured with STASHTRACK_VSREACT_DEV=OFF."
+    Write-Host "For hot-reload development, reconfigure with -DSTASHTRACK_VSREACT_DEV=ON."
 }
 
 if (-not (Test-Path -LiteralPath $pluginSource)) {
@@ -414,7 +435,7 @@ if (Test-Path -LiteralPath $setupOutput) {
 
 $iscc = Ensure-InnoCompiler
 
-Write-Host "Compiling StashTrackv0.6Setup.exe..."
+Write-Host "Compiling StashTrackv0.7Setup.exe..."
 Push-Location $installerRoot
 try {
     & $iscc "StashTrack.iss"

@@ -1,20 +1,18 @@
 #include "PluginEditor.h"
 
-#if STASHTRACK_HAS_REACT_JUCE
- #include <react_juce.h>
+#if ! STASHTRACK_VSREACT_DEV
+ #include "BinaryData.h"
 #endif
 
 namespace
 {
     const juce::Colour kBackground { 0xff0a0b0a };
-    const juce::Colour kPanel      { 0xff101210 };
     const juce::Colour kPanelLift  { 0xff14170f };
     const juce::Colour kWell       { 0xff0c0e0c };
     const juce::Colour kLine       { 0xff2b3029 };
     const juce::Colour kAccent     { 0xffc6f135 };
     const juce::Colour kText       { 0xffe8eae6 };
     const juce::Colour kMuted      { 0xff9aa097 };
-    const juce::Colour kError      { 0xffff4f64 };
 
     juce::String shortenPathForStatus (const juce::File& folder)
     {
@@ -33,75 +31,9 @@ namespace
         return juce::String (label) + ": " + shortenPathForStatus (choice.folder);
     }
 
-    juce::String formatDuration (double seconds)
-    {
-        if (seconds <= 0.0)
-            return {};
-
-        const auto totalSeconds = juce::roundToInt (seconds);
-        const auto minutes = totalSeconds / 60;
-        const auto remainder = totalSeconds % 60;
-
-        return juce::String (minutes) + ":"
-             + juce::String (remainder).paddedLeft ('0', 2);
-    }
 }
 
-#if STASHTRACK_HAS_REACT_JUCE
-class ReactJuceBackdropComponent final : public juce::Component
-{
-public:
-    ReactJuceBackdropComponent()
-        : engine (std::make_shared<reactjuce::EcmascriptEngine>()),
-          appRoot (engine)
-    {
-        addAndMakeVisible (appRoot);
-
-        const juce::File bundle { juce::String (STASHTRACK_REACT_JUCE_BUNDLE_PATH) };
-
-        if (! bundle.existsAsFile())
-            return;
-
-        try
-        {
-            appRoot.reset();
-            appRoot.bindNativeRenderingHooks();
-            appRoot.evaluate (bundle);
-            bundleLoaded = true;
-        }
-        catch (const std::exception& e)
-        {
-            juce::ignoreUnused (e);
-            DBG ("React-JUCE bundle failed: " << e.what());
-            appRoot.setVisible (false);
-        }
-    }
-
-    void resized() override
-    {
-        appRoot.setBounds (getLocalBounds());
-    }
-
-    bool isBundleLoaded() const noexcept
-    {
-        return bundleLoaded;
-    }
-
-private:
-    std::shared_ptr<reactjuce::EcmascriptEngine> engine;
-    reactjuce::ReactApplicationRoot appRoot;
-    bool bundleLoaded = false;
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ReactJuceBackdropComponent)
-};
-#else
-class ReactJuceBackdropComponent final : public juce::Component
-{
-public:
-    bool isBundleLoaded() const noexcept { return false; }
-};
-#endif
-
+//==============================================================================
 class WaveformFileDragComponent final : public juce::Component,
                                         private juce::ChangeListener
 {
@@ -133,77 +65,48 @@ public:
 
     void paint (juce::Graphics& g) override
     {
+        // Chrome (filename, badges) is drawn by the React UI around this
+        // surface — this component is purely the wave + drag area.
         const auto bounds = getLocalBounds().toFloat();
+        constexpr float corner = 10.0f;
 
-        g.setColour (kPanelLift);
-        g.fillRect (bounds);
-        g.setColour (kLine);
-        g.drawRect (bounds.reduced (0.5f), 1.0f);
-
-        auto area = getLocalBounds().reduced (18, 14);
-        auto header = area.removeFromTop (28);
-        auto footer = area.removeFromBottom (24);
-        area.removeFromTop (8);
-        area.removeFromBottom (8);
-
-        g.setFont (juce::FontOptions { 15.0f, juce::Font::bold });
-        g.setColour (kText);
-        g.drawFittedText (audioFile.existsAsFile() ? audioFile.getFileName() : "No audio loaded",
-                          header.removeFromLeft (juce::jmax (80, header.getWidth() - 64)),
-                          juce::Justification::centredLeft,
-                          1);
-
-        if (thumbnail.getTotalLength() > 0.0)
-        {
-            g.setFont (juce::FontOptions { 12.0f });
-            g.setColour (kMuted);
-            g.drawFittedText (formatDuration (thumbnail.getTotalLength()),
-                              header,
-                              juce::Justification::centredRight,
-                              1);
-        }
-
-        const auto waveBounds = area.toFloat();
         g.setColour (kWell);
-        g.fillRect (waveBounds);
+        g.fillRoundedRectangle (bounds, corner);
+        g.setColour (kLine.withAlpha (0.9f));
+        g.drawRoundedRectangle (bounds.reduced (0.5f), corner, 1.0f);
 
-        g.setColour (kLine.withAlpha (0.7f));
-        for (int i = 1; i < 8; ++i)
+        const auto area = getLocalBounds().reduced (14, 12);
+        const auto waveBounds = area.toFloat();
+
+        g.setColour (kLine.withAlpha (0.45f));
+        for (int i = 1; i < 12; ++i)
         {
-            const auto x = waveBounds.getX() + waveBounds.getWidth() * static_cast<float> (i) / 8.0f;
-            g.drawVerticalLine (juce::roundToInt (x), waveBounds.getY() + 6.0f, waveBounds.getBottom() - 6.0f);
+            const auto x = waveBounds.getX() + waveBounds.getWidth() * static_cast<float> (i) / 12.0f;
+            g.drawVerticalLine (juce::roundToInt (x), waveBounds.getY() + 4.0f, waveBounds.getBottom() - 4.0f);
         }
 
-        g.setColour (kLine.brighter (0.2f));
+        g.setColour (kLine.brighter (0.15f));
         g.drawHorizontalLine (juce::roundToInt (waveBounds.getCentreY()),
-                              waveBounds.getX() + 8.0f,
-                              waveBounds.getRight() - 8.0f);
+                              waveBounds.getX() + 4.0f,
+                              waveBounds.getRight() - 4.0f);
 
         if (thumbnail.getTotalLength() > 0.0)
         {
+            // Soft glow pass under the wave, then the wave itself.
+            g.setColour (kAccent.withAlpha (0.22f));
+            thumbnail.drawChannels (g, area.reduced (4, 4), 0.0, thumbnail.getTotalLength(), 1.0f);
             g.setColour (kAccent);
-            thumbnail.drawChannels (g,
-                                    area.reduced (8, 10),
-                                    0.0,
-                                    thumbnail.getTotalLength(),
-                                    0.95f);
+            thumbnail.drawChannels (g, area.reduced (4, 8), 0.0, thumbnail.getTotalLength(), 0.92f);
         }
         else
         {
-            g.setFont (juce::FontOptions { 15.0f });
-            g.setColour (kMuted);
-            g.drawFittedText ("Waveform appears after download",
+            g.setFont (juce::FontOptions { 13.0f });
+            g.setColour (kMuted.withAlpha (0.8f));
+            g.drawFittedText ("waveform appears here after a download",
                               area,
                               juce::Justification::centred,
                               1);
         }
-
-        g.setFont (juce::FontOptions { 12.0f, juce::Font::bold });
-        g.setColour (audioFile.existsAsFile() ? kAccent : kMuted);
-        g.drawFittedText (audioFile.existsAsFile() ? "DRAG TO PLAYLIST" : "WAITING",
-                          footer,
-                          juce::Justification::centredLeft,
-                          1);
     }
 
     void mouseDrag (const juce::MouseEvent& event) override
@@ -266,99 +169,44 @@ YouTubeGrabberAudioProcessorEditor::YouTubeGrabberAudioProcessorEditor (
 {
     currentDownloadChoice = StashTrack::getDownloadFolderChoice();
 
-    reactBackdrop = std::make_unique<ReactJuceBackdropComponent>();
+    vsreact::NativeRegistry registry;
 
-    if (reactBackdrop->isBundleLoaded())
+    registry.registerFactory ("waveform", [this]() -> std::unique_ptr<juce::Component>
     {
-        addAndMakeVisible (*reactBackdrop);
-        reactBackdrop->toBack();
-    }
-    else
+        auto component = std::make_unique<WaveformFileDragComponent>();
+
+        component->onExternalDragStarted = [this] (bool started)
+        {
+            setStatus (started ? "Drop into an empty FL playlist track."
+                               : "Could not start the host file drag.",
+                       started ? "accent" : "error");
+        };
+
+        component->setAudioFile (downloadedFile);
+        waveform = component.get();
+        return component;
+    });
+
+    vsreact::RootOptions options;
+
+#if STASHTRACK_VSREACT_DEV
+    // Development: load the bundle from the source tree and hot-reload it.
+    options.bundleFile = juce::File (juce::String (STASHTRACK_VSREACT_BUNDLE_PATH));
+    options.watchForChanges = true;
+#else
+    // Production: the bundle is embedded in the binary.
+    options.bundleSource = juce::String::fromUTF8 (BinaryData::main_js, BinaryData::main_jsSize);
+#endif
+
+    options.onNativeCall = [this] (const juce::String& name, const juce::var& args)
     {
-        reactBackdrop.reset();
-    }
-
-    titleLabel.setText ("StashTrack v" + juce::String (JucePlugin_VersionString),
-                         juce::dontSendNotification);
-    titleLabel.setFont (juce::FontOptions { 24.0f, juce::Font::bold });
-    titleLabel.setColour (juce::Label::textColourId, kText);
-    titleLabel.setJustificationType (juce::Justification::centredLeft);
-    addAndMakeVisible (titleLabel);
-
-    urlLabel.setText ("SOURCE URL", juce::dontSendNotification);
-    urlLabel.setFont (juce::FontOptions { 12.0f });
-    urlLabel.setColour (juce::Label::textColourId, kMuted);
-    addAndMakeVisible (urlLabel);
-
-    urlField.setMultiLine (false);
-    urlField.setTextToShowWhenEmpty ("https://www.youtube.com/watch?v=...", kMuted);
-    urlField.setColour (juce::TextEditor::backgroundColourId, kWell);
-    urlField.setColour (juce::TextEditor::textColourId, kText);
-    urlField.setColour (juce::TextEditor::outlineColourId, kLine);
-    urlField.setColour (juce::TextEditor::focusedOutlineColourId, kAccent);
-    urlField.setColour (juce::TextEditor::highlightColourId, kAccent.withAlpha (0.35f));
-    urlField.setFont (juce::FontOptions { 15.0f });
-    addAndMakeVisible (urlField);
-
-    downloadButton.setColour (juce::TextButton::buttonColourId, kAccent);
-    downloadButton.setColour (juce::TextButton::buttonOnColourId, kAccent.darker (0.08f));
-    downloadButton.setColour (juce::TextButton::textColourOnId, kBackground);
-    downloadButton.setColour (juce::TextButton::textColourOffId, kBackground);
-    downloadButton.onClick = [this] { startDownload(); };
-    addAndMakeVisible (downloadButton);
-
-    clipToggle.setColour (juce::ToggleButton::textColourId, kText);
-    clipToggle.setColour (juce::ToggleButton::tickColourId, kAccent);
-    clipToggle.setColour (juce::ToggleButton::tickDisabledColourId, kMuted);
-    clipToggle.onClick = [this] { updateClipControls(); };
-    addAndMakeVisible (clipToggle);
-
-    startLabel.setText ("START", juce::dontSendNotification);
-    startLabel.setFont (juce::FontOptions { 12.0f, juce::Font::bold });
-    startLabel.setColour (juce::Label::textColourId, kMuted);
-    startLabel.setJustificationType (juce::Justification::centredLeft);
-    addAndMakeVisible (startLabel);
-
-    endLabel.setText ("END", juce::dontSendNotification);
-    endLabel.setFont (juce::FontOptions { 12.0f, juce::Font::bold });
-    endLabel.setColour (juce::Label::textColourId, kMuted);
-    endLabel.setJustificationType (juce::Justification::centredLeft);
-    addAndMakeVisible (endLabel);
-
-    for (auto* field : { &startField, &endField })
-    {
-        field->setMultiLine (false);
-        field->setColour (juce::TextEditor::backgroundColourId, kWell);
-        field->setColour (juce::TextEditor::textColourId, kText);
-        field->setColour (juce::TextEditor::outlineColourId, kLine);
-        field->setColour (juce::TextEditor::focusedOutlineColourId, kAccent);
-        field->setColour (juce::TextEditor::highlightColourId, kAccent.withAlpha (0.35f));
-        field->setFont (juce::FontOptions { 14.0f });
-        addAndMakeVisible (*field);
-    }
-
-    startField.setTextToShowWhenEmpty ("0:30", kMuted);
-    endField.setTextToShowWhenEmpty ("1:00", kMuted);
-
-    waveform = std::make_unique<WaveformFileDragComponent>();
-    waveform->onExternalDragStarted = [this] (bool started)
-    {
-        setStatus (started ? "Drop into an empty FL playlist track."
-                           : "Could not start the host file drag.",
-                   started ? kAccent : kError);
+        return handleNativeCall (name, args);
     };
-    addAndMakeVisible (*waveform);
 
-    statusLabel.setText (describeChoice (currentDownloadChoice),
-                         juce::dontSendNotification);
-    statusLabel.setFont (juce::FontOptions { 12.0f });
-    statusLabel.setColour (juce::Label::textColourId, kMuted);
-    statusLabel.setJustificationType (juce::Justification::centredLeft);
-    addAndMakeVisible (statusLabel);
+    reactRoot = std::make_unique<vsreact::RootView> (std::move (options), std::move (registry));
+    addAndMakeVisible (*reactRoot);
 
-    updateClipControls();
-
-    setSize (720, 430);
+    setSize (720, 470);
     startUpdateCheck();
 }
 
@@ -378,84 +226,60 @@ YouTubeGrabberAudioProcessorEditor::~YouTubeGrabberAudioProcessorEditor()
 void YouTubeGrabberAudioProcessorEditor::paint (juce::Graphics& g)
 {
     g.fillAll (kBackground);
-
-    g.setColour (kLine.withAlpha (0.45f));
-    for (int x = 0; x < getWidth(); x += 88)
-        g.drawVerticalLine (x, 0.0f, static_cast<float> (getHeight()));
-
-    for (int y = 0; y < getHeight(); y += 88)
-        g.drawHorizontalLine (y, 0.0f, static_cast<float> (getWidth()));
-
-    auto panel = getLocalBounds().reduced (14).toFloat();
-    g.setColour (kPanel);
-    g.fillRect (panel);
-    g.setColour (kLine);
-    g.drawRect (panel.reduced (0.5f), 1.0f);
-
-    const auto header = panel.withHeight (52.0f);
-    g.setColour (kWell);
-    g.fillRect (header);
-    g.setColour (kLine);
-    g.drawLine (panel.getX(), header.getBottom(), panel.getRight(), header.getBottom(), 1.0f);
-
-    const auto markX = panel.getX() + 22.0f;
-    const auto markY = panel.getY() + 19.0f;
-    g.setColour (kAccent);
-    g.fillRect (juce::Rectangle<float> (markX, markY, 10.0f, 14.0f));
-    g.fillRect (juce::Rectangle<float> (markX + 16.0f, markY + 4.0f, 10.0f, 10.0f));
-    g.fillRect (juce::Rectangle<float> (markX + 32.0f, markY - 4.0f, 10.0f, 18.0f));
-
-    auto body = panel.reduced (18.0f).withTrimmedTop (64.0f).withTrimmedBottom (52.0f);
-    g.setColour (kWell.withAlpha (0.72f));
-    g.fillRect (body);
-    g.setColour (kLine.withAlpha (0.8f));
-    g.drawRect (body.reduced (0.5f), 1.0f);
 }
 
 void YouTubeGrabberAudioProcessorEditor::resized()
 {
-    if (reactBackdrop != nullptr)
-        reactBackdrop->setBounds (getLocalBounds());
-
-    auto area = getLocalBounds().reduced (14).reduced (22, 18);
-
-    auto header = area.removeFromTop (34);
-    header.removeFromLeft (58);
-    titleLabel.setBounds (header.removeFromLeft (230));
-    statusLabel.setBounds (header);
-    area.removeFromTop (16);
-
-    urlLabel.setBounds (area.removeFromTop (18));
-    auto urlRow = area.removeFromTop (42);
-    downloadButton.setBounds (urlRow.removeFromRight (124));
-    urlRow.removeFromRight (12);
-    urlField.setBounds (urlRow);
-
-    area.removeFromTop (12);
-    auto clipRow = area.removeFromTop (42);
-    clipToggle.setBounds (clipRow.removeFromLeft (78));
-    clipRow.removeFromLeft (12);
-    startLabel.setBounds (clipRow.removeFromLeft (42));
-    startField.setBounds (clipRow.removeFromLeft (116));
-    clipRow.removeFromLeft (12);
-    endLabel.setBounds (clipRow.removeFromLeft (30));
-    endField.setBounds (clipRow.removeFromLeft (116));
-
-    area.removeFromTop (14);
-
-    waveform->setBounds (area);
+    reactRoot->setBounds (getLocalBounds());
 }
 
 //==============================================================================
-void YouTubeGrabberAudioProcessorEditor::startDownload()
+WaveformFileDragComponent* YouTubeGrabberAudioProcessorEditor::waveformComponent() const
 {
-    if (isThreadRunning())
+    return static_cast<WaveformFileDragComponent*> (waveform.getComponent());
+}
+
+juce::var YouTubeGrabberAudioProcessorEditor::handleNativeCall (const juce::String& name,
+                                                                const juce::var& args)
+{
+    if (name == "getInitialState")
     {
-        setStatus ("A download is already running.", kMuted);
-        return;
+        auto* state = new juce::DynamicObject();
+        state->setProperty ("version", JucePlugin_VersionString);
+        state->setProperty ("choice", describeChoice (currentDownloadChoice));
+        return juce::var (state);
     }
 
-    pendingUrl = urlField.getText().trim();
+    if (name == "startDownload")
+        return startDownloadFromJs (args);
+
+    jassertfalse;   // unknown native call from JS
+    return {};
+}
+
+juce::var YouTubeGrabberAudioProcessorEditor::startDownloadFromJs (const juce::var& args)
+{
+    const auto failure = [this] (const juce::String& title, const juce::String& message)
+    {
+        setStatus (message, "error");
+        showErrorAlert (title, message);
+
+        auto* result = new juce::DynamicObject();
+        result->setProperty ("ok", false);
+        result->setProperty ("message", message);
+        return juce::var (result);
+    };
+
+    if (isThreadRunning())
+    {
+        setStatus ("A download is already running.", "muted");
+
+        auto* result = new juce::DynamicObject();
+        result->setProperty ("ok", false);
+        return juce::var (result);
+    }
+
+    pendingUrl = args["url"].toString().trim();
     pendingDownloadChoice = StashTrack::getDownloadFolderChoice();
     pendingDownloadOptions = {};
 
@@ -465,36 +289,34 @@ void YouTubeGrabberAudioProcessorEditor::startDownload()
                            ? juce::String ("Please paste a URL first.")
                            : juce::String ("Enter a valid http or https URL.");
 
-        setStatus (message, kError);
-        showErrorAlert ("Invalid URL", message);
-        return;
+        return failure ("Invalid URL", message);
     }
 
-    const auto sectionValidation = StashTrack::validateDownloadSection (clipToggle.getToggleState(),
-                                                                        startField.getText(),
-                                                                        endField.getText());
+    const auto sectionValidation = StashTrack::validateDownloadSection (
+        static_cast<bool> (args["clip"]),
+        args["start"].toString(),
+        args["end"].toString());
 
     if (! sectionValidation.valid)
-    {
-        setStatus (sectionValidation.message, kError);
-        showErrorAlert ("Invalid clip range", sectionValidation.message);
-        return;
-    }
+        return failure ("Invalid clip range", sectionValidation.message);
 
     pendingDownloadOptions.section = sectionValidation.section;
 
     downloadedFile = {};
-    waveform->setAudioFile ({});
-    downloadButton.setEnabled (false);
-    clipToggle.setEnabled (false);
-    startField.setEnabled (false);
-    endField.setEnabled (false);
 
+    if (auto* component = waveformComponent())
+        component->setAudioFile ({});
+
+    sendDownloadState (true);
     setStatus ((pendingDownloadOptions.section.enabled ? "Downloading clip to " : "Downloading to ")
                + describeChoice (pendingDownloadChoice),
-               kMuted);
+               "muted");
 
     startThread();
+
+    auto* result = new juce::DynamicObject();
+    result->setProperty ("ok", true);
+    return juce::var (result);
 }
 
 void YouTubeGrabberAudioProcessorEditor::run()
@@ -518,29 +340,47 @@ void YouTubeGrabberAudioProcessorEditor::run()
 
 void YouTubeGrabberAudioProcessorEditor::downloadFinished (StashTrack::DownloadJobResult result)
 {
-    downloadButton.setEnabled (true);
-    clipToggle.setEnabled (true);
-    updateClipControls();
+    sendDownloadState (false);
+
+    const auto sendFinished = [this] (bool ok, const juce::String& fileName)
+    {
+        if (closing || reactRoot == nullptr)
+            return;
+
+        auto* payload = new juce::DynamicObject();
+        payload->setProperty ("ok", ok);
+        payload->setProperty ("fileName", fileName);
+        reactRoot->sendNativeEvent ("downloadFinished", juce::var (payload));
+    };
 
     if (result.succeeded)
     {
         currentDownloadChoice = pendingDownloadChoice;
         downloadedFile = result.downloadedFile;
-        waveform->setAudioFile (downloadedFile);
+
+        if (auto* component = waveformComponent())
+            component->setAudioFile (downloadedFile);
+
+        sendFinished (true, downloadedFile.getFileName());
         setStatus ((pendingDownloadOptions.section.enabled ? "Clip ready: " : "Ready: ")
                    + downloadedFile.getFileName(),
-                   kAccent);
+                   "accent");
         return;
     }
 
-    waveform->setAudioFile ({});
+    sendFinished (false, {});
+
+    if (auto* component = waveformComponent())
+        component->setAudioFile ({});
+
     const auto message = result.message.isNotEmpty()
                        ? result.message
                        : juce::String ("Download failed. Check uv/uvx and ffmpeg.");
-    setStatus (message, kError);
+    setStatus (message, "error");
     showErrorAlert ("Download failed", message);
 }
 
+//==============================================================================
 void YouTubeGrabberAudioProcessorEditor::startUpdateCheck()
 {
     if (updateCheckThread.joinable())
@@ -565,7 +405,7 @@ void YouTubeGrabberAudioProcessorEditor::updateCheckFinished (StashTrack::Update
     if (closing || ! result.succeeded || ! result.updateAvailable)
         return;
 
-    setStatus ("Update available: " + result.latest.versionTag, kAccent);
+    setStatus ("Update available: " + result.latest.versionTag, "accent");
 
     juce::Component::SafePointer<YouTubeGrabberAudioProcessorEditor> safeThis (this);
     const auto latest = result.latest;
@@ -603,7 +443,7 @@ void YouTubeGrabberAudioProcessorEditor::updateCheckFinished (StashTrack::Update
             if (resultCode == 2 && changelogUrl.isNotEmpty())
             {
                 juce::URL (changelogUrl).launchInDefaultBrowser();
-                safeThis->setStatus ("Opened changelog for " + latest.versionTag, kMuted);
+                safeThis->setStatus ("Opened changelog for " + latest.versionTag, "muted");
             }
         }),
         true);
@@ -613,7 +453,7 @@ void YouTubeGrabberAudioProcessorEditor::startUpdateInstallerDownload (StashTrac
 {
     if (updateInstallerDownloadRunning)
     {
-        setStatus ("Update download is already running.", kMuted);
+        setStatus ("Update download is already running.", "muted");
         return;
     }
 
@@ -621,7 +461,7 @@ void YouTubeGrabberAudioProcessorEditor::startUpdateInstallerDownload (StashTrac
         updateInstallerThread.join();
 
     updateInstallerDownloadRunning = true;
-    setStatus ("Downloading " + latest.versionTag + " installer...", kMuted);
+    setStatus ("Downloading " + latest.versionTag + " installer...", "muted");
 
     const auto destination = StashTrack::getUpdaterDownloadFile (latest.versionTag);
     const auto installerUrl = latest.installerUrl;
@@ -651,14 +491,14 @@ void YouTubeGrabberAudioProcessorEditor::updateInstallerDownloadFinished (StashT
         const auto message = result.message.isNotEmpty()
                            ? result.message
                            : juce::String ("Could not download the update installer.");
-        setStatus (message, kError);
+        setStatus (message, "error");
         showErrorAlert ("Update failed", message);
         return;
     }
 
     if (StashTrack::launchInstaller (result.installerFile))
     {
-        setStatus ("Installer opened. Close FL Studio to finish updating.", kAccent);
+        setStatus ("Installer opened. Close FL Studio to finish updating.", "accent");
         juce::AlertWindow::showMessageBoxAsync (
             juce::AlertWindow::InfoIcon,
             "Installer opened",
@@ -669,27 +509,31 @@ void YouTubeGrabberAudioProcessorEditor::updateInstallerDownloadFinished (StashT
 
     const auto message = "Downloaded the installer, but could not open it: "
                        + result.installerFile.getFullPathName();
-    setStatus (message, kError);
+    setStatus (message, "error");
     showErrorAlert ("Update downloaded", message);
 }
 
-void YouTubeGrabberAudioProcessorEditor::updateClipControls()
+//==============================================================================
+void YouTubeGrabberAudioProcessorEditor::setStatus (const juce::String& message,
+                                                    const juce::String& tone)
 {
-    const auto enabled = clipToggle.getToggleState() && clipToggle.isEnabled();
+    if (closing || reactRoot == nullptr)
+        return;
 
-    startLabel.setEnabled (enabled);
-    endLabel.setEnabled (enabled);
-    startField.setEnabled (enabled);
-    endField.setEnabled (enabled);
-    startField.setAlpha (enabled ? 1.0f : 0.45f);
-    endField.setAlpha (enabled ? 1.0f : 0.45f);
+    auto* payload = new juce::DynamicObject();
+    payload->setProperty ("message", message);
+    payload->setProperty ("tone", tone);
+    reactRoot->sendNativeEvent ("status", juce::var (payload));
 }
 
-void YouTubeGrabberAudioProcessorEditor::setStatus (const juce::String& message,
-                                                    juce::Colour colour)
+void YouTubeGrabberAudioProcessorEditor::sendDownloadState (bool running)
 {
-    statusLabel.setColour (juce::Label::textColourId, colour);
-    statusLabel.setText (message, juce::dontSendNotification);
+    if (closing || reactRoot == nullptr)
+        return;
+
+    auto* payload = new juce::DynamicObject();
+    payload->setProperty ("running", running);
+    reactRoot->sendNativeEvent ("downloadState", juce::var (payload));
 }
 
 void YouTubeGrabberAudioProcessorEditor::showErrorAlert (const juce::String& title,

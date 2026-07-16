@@ -49,8 +49,9 @@ If you share StashTrack or a modified version, you must:
 
 ## Third-Party Components
 
-StashTrack uses third-party components and tools, including JUCE, React-JUCE,
-yt-dlp, uv, Deno, ffmpeg, Inno Setup, and Microsoft runtime components. Those
+StashTrack uses third-party components and tools, including JUCE, VSReacT
+(with QuickJS, Yoga, and React), yt-dlp, uv, Deno, ffmpeg, Inno Setup, and
+Microsoft runtime components. Those
 third-party components are governed by their own licenses. This license does
 not replace or override third-party licenses.
 
