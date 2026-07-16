@@ -101,7 +101,9 @@ set(VSREACT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../vsreact"
 if (EXISTS "${VSREACT_DIR}/CMakeLists.txt")
     add_subdirectory("${VSREACT_DIR}" vsreact-build)
     target_link_libraries(StashTrack PRIVATE vsreact)
-    target_compile_definitions(StashTrack PRIVATE STASHTRACK_HAS_VSREACT=1)
+    target_compile_definitions(StashTrack PRIVATE
+        STASHTRACK_HAS_VSREACT=1
+        STASHTRACK_VSREACT_BUNDLE_PATH="${VSREACT_DIR}/js/demo/build/main.js")
 else()
     message(WARNING "VSReacT not found at ${VSREACT_DIR}; building without it.")
 endif()

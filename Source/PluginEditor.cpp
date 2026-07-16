@@ -1,6 +1,8 @@
 #include "PluginEditor.h"
 
-#if STASHTRACK_HAS_REACT_JUCE
+#if STASHTRACK_HAS_VSREACT
+ #include <vsreact/vsreact.h>
+#elif STASHTRACK_HAS_REACT_JUCE
  #include <react_juce.h>
 #endif
 
@@ -47,7 +49,39 @@ namespace
     }
 }
 
-#if STASHTRACK_HAS_REACT_JUCE
+#if STASHTRACK_HAS_VSREACT
+class ReactJuceBackdropComponent final : public juce::Component
+{
+public:
+    ReactJuceBackdropComponent()
+    {
+        vsreact::RootOptions options;
+        options.bundleFile = juce::File (juce::String (STASHTRACK_VSREACT_BUNDLE_PATH));
+        options.watchForChanges = true;
+
+        bundleLoaded = options.bundleFile.existsAsFile();
+
+        root = std::make_unique<vsreact::RootView> (std::move (options));
+        addAndMakeVisible (*root);
+    }
+
+    void resized() override
+    {
+        root->setBounds (getLocalBounds());
+    }
+
+    bool isBundleLoaded() const noexcept
+    {
+        return bundleLoaded;
+    }
+
+private:
+    std::unique_ptr<vsreact::RootView> root;
+    bool bundleLoaded = false;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ReactJuceBackdropComponent)
+};
+#elif STASHTRACK_HAS_REACT_JUCE
 class ReactJuceBackdropComponent final : public juce::Component
 {
 public:
