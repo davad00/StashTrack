@@ -105,6 +105,27 @@ else()
     message(STATUS "Bun was not found; run jsui-vsreact builds manually after installing Bun.")
 endif()
 
+juce_add_console_app(StashTrackDownloadProbe
+    PRODUCT_NAME "StashTrackDownloadProbe")
+
+target_sources(StashTrackDownloadProbe PRIVATE
+    Tools/DownloadProbe.cpp
+    Source/DownloadUtils.cpp)
+
+target_compile_definitions(StashTrackDownloadProbe
+    PRIVATE
+        JUCE_WEB_BROWSER=0
+        JUCE_USE_CURL=0)
+
+target_link_libraries(StashTrackDownloadProbe
+    PRIVATE
+        juce::juce_core
+        juce::juce_events
+        juce::juce_gui_basics
+    PUBLIC
+        juce::juce_recommended_config_flags
+        juce::juce_recommended_warning_flags)
+
 juce_add_console_app(StashTrackUiProbe
     PRODUCT_NAME "StashTrackUiProbe")
 

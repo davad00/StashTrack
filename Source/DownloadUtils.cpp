@@ -515,6 +515,9 @@ juce::StringArray buildYtDlpCommand (const juce::String& url,
     command.add ("--no-playlist");
     command.add ("--force-overwrites");
     command.add ("--newline");
+    // --print implies --quiet, which silences the progress bar; --progress
+    // forces it back on so the UI gets live percentages.
+    command.add ("--progress");
     command.add ("--print");
     command.add ("after_move:filepath");
 

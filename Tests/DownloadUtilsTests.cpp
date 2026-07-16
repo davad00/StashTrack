@@ -33,6 +33,12 @@ namespace
                 "download lines without a percent should return -1");
         expect (parseYtDlpProgressPercent ("[download] 100% of 3.50MiB in 00:02") == 100.0f,
                 "completion line should parse as 100");
+
+        const auto folder = juce::File::getSpecialLocation (juce::File::tempDirectory);
+        const auto command = StashTrack::buildYtDlpCommand ("https://example.com/x", folder);
+        expect (command.contains ("--newline"), "command must emit line-based progress");
+        expect (command.contains ("--progress"),
+                "command must force the progress bar back on (--print implies --quiet)");
     }
 
     void historyStoreRoundTrips()

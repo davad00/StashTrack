@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build-and-test:
+    name: Plugin + tests (Windows)
+    runs-on: windows-latest
+    steps:
+      # Recreate the local two-repo layout: the VSReacT framework repo is the
+      # workspace root (it gitignores StashTrack/), StashTrack nests inside it.
+      - uses: actions/checkout@v4
+        with:
+          repository: davad00/VSReacT
+          token: ${{ secrets.VSREACT_CHECKOUT_TOKEN }}
+      - uses: actions/checkout@v4
+        with:
+          path: StashTrack
+      - uses: actions/checkout@v4
+        with:
+          repository: juce-framework/JUCE
+          ref: "8.0.4"
+          path: JUCE
+      - uses: oven-sh/setup-bun@v2
+
+      - name: Build UI bundle
+        run: |
+          bun install
+          cd StashTrack/jsui-vsreact
+          bun run build
+
+      - name: Configure
+        run: cmake -S StashTrack -B build -G "Visual Studio 17 2022" -A x64 -DJUCE_SOURCE_DIR="${{ github.workspace }}/JUCE"
+
+      - name: Build
+        run: cmake --build build --target StashTrackTests VSReacTTests StashTrack_VST3 --config Release --parallel 4
+
+      - name: Test
+        run: ctest --test-dir build -C Release --output-on-failure
