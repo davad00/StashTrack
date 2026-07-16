@@ -4,16 +4,10 @@ import { useEffect, useRef, useState } from 'react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import styles from './page.module.css'
-import {
-  Cursor,
-  Magnetic,
-  ScrollReadout,
-  WaveRiver,
-  useMotionReady,
-  useReveal,
-} from './components/experience'
+import { Magnetic, useMotionReady, useReveal } from './components/experience'
 
-const SUPPORT_EMAIL = 'vsts@n9records.com'
+const SUPPORT_EMAIL = 'StashTrack-Support@n9records.com'
+const VSREACT_URL = 'https://vsreact.n9records.com'
 const DOWNLOAD_URL = '/download/windows'
 const DOWNLOAD_MACOS_URL = '/download/macos'
 const DOWNLOAD_LINUX_URL = '/download/linux'
@@ -106,18 +100,24 @@ export default function Home() {
 
     const chip = chipRef.current
     const track = trackRef.current
+    const stage = chip.parentElement!
+
+    // Land the chip exactly on the track, whatever the viewport gave us.
+    const travel = () =>
+      Math.max(80, stage.clientHeight - chip.offsetHeight - track.offsetHeight + 34)
 
     const tl = gsap.timeline({
       scrollTrigger: {
         trigger: dragSceneRef.current,
         start: 'top top',
-        end: '+=140%',
+        end: '+=120%',
         pin: true,
         scrub: 1,
+        invalidateOnRefresh: true,
       },
     })
 
-    tl.to(chip, { y: 250, x: 40, rotate: 3, ease: 'none' }, 0)
+    tl.to(chip, { y: travel, x: 40, rotate: 3, ease: 'none' }, 0)
       .to(chip, { boxShadow: '0 30px 80px rgba(198, 241, 53, 0.28)', ease: 'none' }, 0)
       .fromTo(
         track,
@@ -139,13 +139,20 @@ export default function Home() {
         Skip to content
       </a>
 
-      <Cursor />
-      <WaveRiver />
-
       <header className={styles.nav} aria-label="Primary">
         <a href="#top" className={styles.brand} aria-label="StashTrack home">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logos/logo-no-text.jpeg" alt="" width={30} height={30} />
+          <video
+            className={styles.brandMark}
+            src="/logos/logo-animated-no-text.mp4"
+            poster="/logos/logo-no-text.jpeg"
+            width={30}
+            height={30}
+            autoPlay
+            muted
+            loop
+            playsInline
+            aria-hidden="true"
+          />
           <span>StashTrack</span>
           <span className={styles.versionPill}>
             <i aria-hidden="true" />
@@ -157,9 +164,6 @@ export default function Home() {
           <a href="#platforms">Downloads</a>
           <a href={`mailto:${SUPPORT_EMAIL}`}>Support</a>
         </nav>
-        <span className={styles.readout} aria-hidden="true">
-          <ScrollReadout />
-        </span>
       </header>
 
       <section ref={heroRef} className={styles.hero}>
@@ -204,7 +208,7 @@ export default function Home() {
           <div className={styles.pluginBody}>
             <span className={styles.microLabel}>SOURCE URL</span>
             <div className={styles.urlRow}>
-              <span className={styles.urlText}>youtube.com/watch?v=hsGOT_0L16U</span>
+              <span className={styles.urlText}>youtube.com/watch?v=dQw4w9WgXcQ</span>
               <span className={styles.urlButton}>DOWNLOAD</span>
             </div>
             <div className={styles.pluginWave} aria-hidden="true">
@@ -289,7 +293,7 @@ export default function Home() {
 
           <article className={styles.platformCard} data-reveal>
             <span className={styles.microLabel}>MACOS · VST3 PKG</span>
-            <h3>Unsigned, on purpose (for now).</h3>
+            <h3>Unsigned (for now).</h3>
             <p>
               Installs to /Library/Audio/Plug-Ins/VST3. No Apple Developer ID
               yet, so on first install: right-click the .pkg → Open, or allow
@@ -317,13 +321,25 @@ export default function Home() {
 
         <p className={styles.updateNote} data-reveal>
           <span className={styles.microAccent}>AUTO-UPDATES</span> — StashTrack
-          checks GitHub when the plugin opens. Windows installs the new version
-          in place; macOS and Linux are pointed at the right download for their
-          platform.
+          checks for new versions when the plugin opens and offers the newest
+          build right away.
         </p>
       </section>
 
       <section className={styles.finalCta}>
+        <video
+          className={styles.ctaMark}
+          src="/logos/logo-animated-no-text.mp4"
+          poster="/logos/logo-no-text.jpeg"
+          width={104}
+          height={104}
+          autoPlay
+          muted
+          loop
+          playsInline
+          aria-hidden="true"
+          data-reveal
+        />
         <h2 className={styles.ctaTitle} data-reveal>
           KEEP THE BROWSER
           <br />
@@ -353,7 +369,10 @@ export default function Home() {
         <p>
           Support: <a href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a>
         </p>
-        <p>Rendered natively by VSReacT. Only sample what you have rights to.</p>
+        <p>
+          Rendered natively by <a href={VSREACT_URL}>VSReacT</a>. Only sample
+          what you have rights to.
+        </p>
       </footer>
     </main>
   )

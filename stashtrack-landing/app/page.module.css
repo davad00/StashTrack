@@ -116,13 +116,16 @@
   color: var(--accent);
 }
 
-.readout {
-  font-family: var(--font-micro);
-  font-size: 11px;
-  letter-spacing: 0.14em;
-  color: var(--accent);
-  min-width: 150px;
-  text-align: right;
+.brandMark {
+  border-radius: 7px;
+  display: block;
+  object-fit: cover;
+}
+
+.ctaMark {
+  border-radius: 18px;
+  object-fit: cover;
+  box-shadow: 0 20px 60px rgba(198, 241, 53, 0.15);
 }
 
 /* ---------------------------------------------------------------- hero */
@@ -371,7 +374,7 @@
 
 .dragScene {
   min-height: 100vh;
-  padding: 14vh 5vw;
+  padding: 9vh 5vw;
   display: flex;
   align-items: center;
 }
@@ -382,13 +385,14 @@
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
 }
 
 .dragStage {
-  margin-top: 6vh;
+  margin-top: 3vh;
   position: relative;
-  min-height: 420px;
+  height: min(44vh, 430px);
+  min-height: 300px;
 }
 
 .waveChip {
@@ -550,7 +554,6 @@
     padding: 14px 20px;
   }
 
-  .readout,
   .navLinks {
     display: none;
   }
