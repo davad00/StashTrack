@@ -1,4 +1,4 @@
-import { render, configureTheme } from "vsreact-core";
+import { render, configureTheme } from "@vsreact/core";
 import App from "./App";
 
 configureTheme({

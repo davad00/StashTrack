@@ -8,7 +8,7 @@ import {
   useTween,
   lerp,
   Easing,
-} from "vsreact-core";
+} from "@vsreact/core";
 
 type Tone = "muted" | "accent" | "error";
 
